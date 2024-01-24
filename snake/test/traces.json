@@ -1,0 +1,1229 @@
+{
+  "test001": {
+    "description": "Default board appears on screen",
+    "seed": "2",
+    "snake_grows": "0",
+    "key_input": "",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XG?...............GX",
+        "XG................GX",
+        "XG........?.......GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test002": {
+    "description": "Default board appears on screen with snake",
+    "seed": "2",
+    "snake_grows": "0",
+    "key_input": "",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XGS...............GX",
+        "XG................GX",
+        "XG........?.......GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test003": {
+    "description": "Test snake movement with no input. Snake should move right",
+    "seed": "2",
+    "snake_grows": "0",
+    "key_input": "NNNN",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XG....S...........GX",
+        "XG................GX",
+        "XG........?.......GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test004": {
+    "description": "Test that colliding with grass causes snake + grass overlap",
+    "seed": "2",
+    "snake_grows": "0",
+    "key_input": "NNNNNNNNNNNNNNNN",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XG................sX",
+        "XG................GX",
+        "XG........?.......GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test005": {
+    "description": "Test that colliding with a wall causes game over",
+    "seed": "2",
+    "snake_grows": "0",
+    "key_input": "NNNNNNNNNNNNNNNNN",
+    "output": {
+      "game_over": 1,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XG................sX",
+        "XG................GX",
+        "XG........?.......GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test006": {
+    "description": "Test snake movement with input. One 'none', then one 'down', then many 'none'",
+    "seed": "2",
+    "snake_grows": "0",
+    "key_input": "NDNNN",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XG................GX",
+        "XG................GX",
+        "XG........?.......GX",
+        "XG................GX",
+        "XG.S..............GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test007": {
+    "description": "Test snake movement with input. One 'down' immediately, then many 'none'",
+    "seed": "2",
+    "snake_grows": "0",
+    "key_input": "DNNN",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XG................GX",
+        "XG................GX",
+        "XG........?.......GX",
+        "XG................GX",
+        "XGS...............GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test008": {
+    "description": "Test snake movement with input. Many 'down' inputs in a row",
+    "seed": "2",
+    "snake_grows": "0",
+    "key_input": "DDDD",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XG................GX",
+        "XG................GX",
+        "XG........?.......GX",
+        "XG................GX",
+        "XGS...............GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test009": {
+    "description": "Test complicated snake movement",
+    "seed": "2",
+    "snake_grows": "0",
+    "key_input": "ULDRNND",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XG................GX",
+        "XG..S.............GX",
+        "XG........?.......GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test010": {
+    "description": "Test that single snake can double back on itself",
+    "seed": "2",
+    "snake_grows": "0",
+    "key_input": "NNLNN",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "Xs................GX",
+        "XG................GX",
+        "XG........?.......GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test011": {
+    "description": "Test that food generates properly",
+    "seed": "2",
+    "snake_grows": "0",
+    "key_input": "",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XGS...............GX",
+        "XG................GX",
+        "XG........O.......GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test012": {
+    "description": "Test that collecting food causes score to increment and new food to appear",
+    "seed": "4",
+    "snake_grows": "0",
+    "key_input": "LDNNN",
+    "output": {
+      "game_over": 0,
+      "score": 1,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XG................GX",
+        "XG................GX",
+        "XG.O..............GX",
+        "XG................GX",
+        "Xs................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test013": {
+    "description": "First food generated can't be inside wall",
+    "seed": "0",
+    "snake_grows": "0",
+    "key_input": "",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XGS...............GX",
+        "XG................GX",
+        "XG....O...........GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test014": {
+    "description": "Subsequent food generated can't be inside wall",
+    "seed": "2",
+    "snake_grows": "0",
+    "key_input": "NNNNNNNNDN",
+    "output": {
+      "game_over": 0,
+      "score": 1,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XG................GX",
+        "XG................GX",
+        "XG........S.......GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGoGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test015": {
+    "description": "Food can't generate inside snake",
+    "seed": "545",
+    "snake_grows": "0",
+    "key_input": "NNNNNNNNNNNNNNNDNNNNN",
+    "output": {
+      "game_over": 0,
+      "score": 1,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XG................GX",
+        "XG................GX",
+        "XG.....O..........GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGsGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test016": {
+    "description": "Test decompression of simple Rectangle board (only outer walls)",
+    "board": "B5x10|W10|W1E8W1|W1E8W1|W1E3S1E4W1|W10",
+    "seed": "5",
+    "snake_grows": "0",
+    "key_input": "",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 10,
+      "height": 5,
+      "cells": [
+        "XXXXXXXXXX",
+        "X........X",
+        "X....O...X",
+        "X...S....X",
+        "XXXXXXXXXX"
+      ]
+    }
+  },
+  "test017": {
+    "description": "Test decompression of simple square room with interior and outer walls and grass",
+    "board": "B10x10|W10|W1E8W1|W3G3E3W1|W1E2G1S1G1E3W1|W1E2G3E3W1|W1E8W1|W1E5W4|W1E1W1E4G2W1|W1E1W1E4G2W1|W10",
+    "seed": "0",
+    "snake_grows": "0",
+    "key_input": "",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 10,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXX",
+        "X........X",
+        "XXXGGG...X",
+        "X..GSG...X",
+        "X..GGG...X",
+        "X........X",
+        "X.....XXXX",
+        "X.X....GGX",
+        "X.XO...GGX",
+        "XXXXXXXXXX"
+      ]
+    }
+  },
+  "test018": {
+    "description": "Test decompression of complicated rectangular room with interior walls and some missing exterior walls and some grass",
+    "board": "B7x10|W1E1W1E1W1E1W1E1W1S1|E1W1E1W1E1W1E1W1E1W1|E10|W10|W1G1E1G1E1G1E1G1E1W1|W1E1G1E1G1E1G1E1G1W1|W10",
+    "seed": "0",
+    "snake_grows": "0",
+    "key_input": "",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 10,
+      "height": 7,
+      "cells": [
+        "X.X.X.X.XS",
+        ".X.X.X.X.X",
+        "..........",
+        "XXXXXXXXXX",
+        "XG.o.G.G.X",
+        "X.G.G.G.GX",
+        "XXXXXXXXXX"
+      ]
+    }
+  },
+  "test019": {
+    "description": "Test decompression of very large board",
+    "board": "B56x204|W204|W1S1E201W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W1E202W1|W204",
+    "seed": "0",
+    "snake_grows": "0",
+    "key_input": "",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 204,
+      "height": 56,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        "XS.........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..................................................................................................................................................................O.......................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "X..........................................................................................................................................................................................................X",
+        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test020": {
+    "description": "Error raised when decompressing board with too long row",
+    "board": "B5x10|W10|W1E8W5|W1E8W1|W1E3S1E4W1|W10",
+    "seed": "0",
+    "snake_grows": "0",
+    "key_input": "",
+    "output": {
+      "board_error": "INCORRECT_DIMENSIONS"
+    }
+  },
+  "test021": {
+    "description": "Error raised when decompressing board with too short row",
+    "board": "B5x10|W10|W1E8W1|W1E8W1|W1E3S1E4W1|W8",
+    "seed": "0",
+    "snake_grows": "0",
+    "key_input": "",
+    "output": {
+      "board_error": "INCORRECT_DIMENSIONS"
+    }
+  },
+  "test022": {
+    "description": "Error raised when decompressing board with too few rows",
+    "board": "B5x10|W10|W1E8W1|W1E3S1E4W1|W10",
+    "seed": "0",
+    "snake_grows": "0",
+    "key_input": "",
+    "output": {
+      "board_error": "INCORRECT_DIMENSIONS"
+    }
+  },
+  "test023": {
+    "description": "Error raised when decompressing board with too many rows",
+    "board": "B5x10|W10|W1E8W1|W1E3S1E4W1|W1E8W1|W1E8W1|W10",
+    "seed": "0",
+    "snake_grows": "0",
+    "key_input": "",
+    "output": {
+      "board_error": "INCORRECT_DIMENSIONS"
+    }
+  },
+  "test024": {
+    "description": "Error raised when decompressing board with bad character",
+    "board": "B5x10|W10|W1E8Z1|W1E3S1E4W1|W1E8W1|W10",
+    "seed": "0",
+    "snake_grows": "0",
+    "key_input": "",
+    "output": {
+      "board_error": "BAD_CHAR"
+    }
+  },
+  "test025": {
+    "description": "Error raised when decompressing board with 0 snakes",
+    "board": "B5x10|W10|W1E8W1|W1E8W1|W1E8W1|W10",
+    "seed": "0",
+    "snake_grows": "0",
+    "key_input": "",
+    "output": {
+      "board_error": "WRONG_SNAKE_NUM"
+    }
+  },
+  "test026": {
+    "description": "Error raised when decompressing board with two adjacent snakes",
+    "board": "B5x10|W10|W1E6S2W1|W1E8W1|W1E8W1|W10",
+    "seed": "0",
+    "snake_grows": "0",
+    "key_input": "",
+    "output": {
+      "board_error": "WRONG_SNAKE_NUM"
+    }
+  },
+  "test027": {
+    "description": "Error raised when decompressing board with two non-adjacent snakes",
+    "board": "B5x10|W10|W1E6S1E1W1|W1E8W1|W1E7S1W1|W10",
+    "seed": "0",
+    "snake_grows": "0",
+    "key_input": "",
+    "output": {
+      "board_error": "WRONG_SNAKE_NUM"
+    }
+  },
+  "test028": {
+    "description": "Test that snake colliding with interior wall causes game over",
+    "board": "B10x10|W10|W1E8W1|W3E6W1|W1E3S1E4W1|W1E8W1|W1E8W1|W1E5W4|W1E1W1E6W1|W1E1W1E6W1|W10",
+    "seed": "0",
+    "snake_grows": "0",
+    "key_input": "RNDNNN",
+    "output": {
+      "game_over": 1,
+      "score": 0,
+      "width": 10,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXX",
+        "X........X",
+        "XXX......X",
+        "X........X",
+        "X........X",
+        "X.....S..X",
+        "X.....XXXX",
+        "X.X......X",
+        "X.XO.....X",
+        "XXXXXXXXXX"
+      ]
+    }
+  },
+  "test029": {
+    "description": "Collecting food causes snake to grow",
+    "seed": "0",
+    "snake_grows": "1",
+    "key_input": "NNNNDN",
+    "output": {
+      "game_over": 0,
+      "score": 1,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XG................GX",
+        "XG....S...........GX",
+        "XG....S...........GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGoGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test030": {
+    "description": "Growing snake supports changing direction",
+    "seed": "0",
+    "snake_grows": "1",
+    "key_input": "NNNNDNR",
+    "output": {
+      "game_over": 0,
+      "score": 1,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XG................GX",
+        "XG................GX",
+        "XG....SS..........GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGoGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test031": {
+    "description": "Growing snake supports bends",
+    "seed": "2",
+    "snake_grows": "1",
+    "key_input": "NNNNNNNNDNNNNNRNNNNU",
+    "output": {
+      "game_over": 0,
+      "score": 2,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XG................GX",
+        "Xo................GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XG.............S..GX",
+        "XGGGGGGGGGGGGGssGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test032": {
+    "description": "Grown snake cannot double back on itself",
+    "seed": "0",
+    "snake_grows": "1",
+    "key_input": "RNNNDNU",
+    "output": {
+      "game_over": 0,
+      "score": 1,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XG................GX",
+        "XG................GX",
+        "XG....S...........GX",
+        "XG....S...........GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGoGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test033": {
+    "description": "Snake can collect multiple food in a row",
+    "seed": "22399895",
+    "snake_grows": "1",
+    "key_input": "NNNNN",
+    "output": {
+      "game_over": 0,
+      "score": 3,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XG..SSSS..........GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGoGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test034": {
+    "description": "Growing snake colliding with itself causes game over",
+    "seed": "33280485",
+    "snake_grows": "1",
+    "key_input": "NNNNNNNNNNNDNLUR",
+    "output": {
+      "game_over": 1,
+      "score": 4,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XG...........S....GX",
+        "XG..........SS....GX",
+        "XG..........SS....GX",
+        "XG........O.......GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test035": {
+    "description": "Growing snake colliding with itself on grass causes game over",
+    "board": "B10x20|W20|W1G18W1|W1G1S1G16W1|W1G18W1|W1G18W1|W1G18W1|W1G18W1|W1G18W1|W1G18W1|W20",
+    "seed": "33280485",
+    "snake_grows": "1",
+    "key_input": "NNNNNNNNNNNDNLUR",
+    "output": {
+      "game_over": 1,
+      "score": 4,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XG.GGGGGGGGGGsGGGGGX",
+        "XGGGGGGGGGGGssGGGGGX",
+        "XGGGGGGGGGGGssGGGGGX",
+        "XGGGGGGGGGoGGGGGGGGX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test036": {
+    "description": "Snake that moves to the location it's tail was at on the prior frame does not cause game over",
+    "seed": "22399895",
+    "snake_grows": "1",
+    "key_input": "NNNNNNDLURN",
+    "output": {
+      "game_over": 0,
+      "score": 3,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XG.....SSS........GX",
+        "XG.....S..........GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGoGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test037": {
+    "description": "Snake that moves to the location it's tail was at on the prior frame on grass does not cause game over",
+    "seed": "22399895",
+    "snake_grows": "1",
+    "key_input": "NNNNNNDLURN",
+    "output": {
+      "game_over": 0,
+      "score": 3,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XG.....SSS........GX",
+        "XG.....S..........GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGoGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test038": {
+    "description": "Food can't generate inside growing snake",
+    "seed": "64",
+    "snake_grows": "1",
+    "key_input": "NNNNNNNNNNNNNNDN",
+    "output": {
+      "game_over": 0,
+      "score": 1,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGoGGGGGGGGGX",
+        "XG................GX",
+        "XG..............S.GX",
+        "XG..............S.GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test039": {
+    "description": "Once game_over is set, the update function should not do anything",
+    "seed": "0",
+    "snake_grows": "0",
+    "key_input": "UNNNNNNNNNNNNRRRRRNN",
+    "output": {
+      "game_over": 1,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGsGGGGGGGGGGGGGGGGX",
+        "XG................GX",
+        "XG................GX",
+        "XG....O...........GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ]
+    }
+  },
+  "test040": {
+    "description": "Test name handling (ASCII)",
+    "board": "B10x10|W10|W1E8W1|W1E8W1|W1E3S1E4W1|W1E8W1|W1E8W1|W1E8W1|W1E8W1|W1E8W1|W10",
+    "seed": "0",
+    "snake_grows": "1",
+    "key_input": "",
+    "name": "benleejamin",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 10,
+      "height": 10,
+      "cells": "XXXXXXXXXXX........XX........XX...S....XX........XX........XX........XX........XX..O.....XXXXXXXXXXX",
+      "name": "benleejamin",
+      "name_len": 11
+    }
+  },
+  "test041": {
+    "description": "Test name handling (non-ASCII)",
+    "board": "B10x10|W10|W1E8W1|W1E8W1|W1E3S1E4W1|W1E8W1|W1E8W1|W1E8W1|W1E8W1|W1E8W1|W10",
+    "seed": "0",
+    "snake_grows": "1",
+    "key_input": "",
+    "name": "이형준",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 10,
+      "height": 10,
+      "cells": "XXXXXXXXXXX........XX........XX...S....XX........XX........XX........XX........XX..O.....XXXXXXXXXXX",
+      "name": "이형준",
+      "name_len": 3
+    }
+  },
+  "test042": {
+    "description": "ascii1",
+    "seed": "2",
+    "snake_grows": "0",
+    "key_input": "",
+    "name": "1",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XGS...............GX",
+        "XG................GX",
+        "XG........?.......GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ],
+      "name": "1",
+      "name_len": 1
+    }
+  },
+  "test043": {
+    "description": "ascii16",
+    "seed": "2",
+    "snake_grows": "0",
+    "key_input": "",
+    "name": "Robert Baratheon",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XGS...............GX",
+        "XG................GX",
+        "XG........?.......GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ],
+      "name": "Robert Baratheon",
+      "name_len": 16
+    }
+  },
+  "test044": {
+    "description": "Euro",
+    "seed": "2",
+    "snake_grows": "0",
+    "key_input": "",
+    "name": "€",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XGS...............GX",
+        "XG................GX",
+        "XG........?.......GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ],
+      "name": "€",
+      "name_len": 1
+    }
+  },
+  "test045": {
+    "description": "Maxwell",
+    "seed": "2",
+    "snake_grows": "0",
+    "key_input": "",
+    "name": "∮ E⋅da = Q",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XGS...............GX",
+        "XG................GX",
+        "XG........?.......GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ],
+      "name": "∮ E⋅da = Q",
+      "name_len": 10
+    }
+  },
+  "test046": {
+    "description": "Greek",
+    "seed": "2",
+    "snake_grows": "0",
+    "key_input": "",
+    "name": "Οὐχὶ ταὐτὰ παρίσταταί μοι γιγνώσκειν, ὦ ἄνδρες",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XGS...............GX",
+        "XG................GX",
+        "XG........?.......GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ],
+      "name": "Οὐχὶ ταὐτὰ παρίσταταί μοι γιγνώσκειν, ὦ ἄνδρες",
+      "name_len": 46
+    }
+  },
+  "test047": {
+    "description": "Runes",
+    "seed": "2",
+    "snake_grows": "0",
+    "key_input": "",
+    "name": "ᚻᛖ ᚳᚹᚫᚦ ᚦᚫᛏ ᚻᛖ ᛒᚢᛞᛖ ᚩᚾ ᚦᚫᛗ ᛚᚪᚾᛞᛖ ᚾᚩᚱᚦᚹᛖᚪᚱᛞᚢᛗ ᚹᛁᚦ ᚦᚪ ᚹᛖᛥᚫ",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XGS...............GX",
+        "XG................GX",
+        "XG........?.......GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ],
+      "name": "ᚻᛖ ᚳᚹᚫᚦ ᚦᚫᛏ ᚻᛖ ᛒᚢᛞᛖ ᚩᚾ ᚦᚫᛗ ᛚᚪᚾᛞᛖ ᚾᚩᚱᚦᚹᛖᚪᚱᛞᚢᛗ ᚹᛁᚦ ᚦᚪ ᚹᛖᛥᚫ",
+      "name_len": 56
+    }
+  },
+  "test048": {
+    "description": "Runes",
+    "seed": "2",
+    "snake_grows": "0",
+    "key_input": "",
+    "name": "⡍⠜⠇⠑⠹ ⠺⠁⠎ ⠙⠑⠁⠙⠒ ⠞⠕ ⠃⠑⠛⠔ ⠺⠊⠹⠲ ⡹⠻⠑ ⠊⠎ ⠝⠕ ⠙⠳⠃⠞",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XGS...............GX",
+        "XG................GX",
+        "XG........?.......GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ],
+      "name": "⡍⠜⠇⠑⠹ ⠺⠁⠎ ⠙⠑⠁⠙⠒ ⠞⠕ ⠃⠑⠛⠔ ⠺⠊⠹⠲ ⡹⠻⠑ ⠊⠎ ⠝⠕ ⠙⠳⠃⠞",
+      "name_len": 43
+    }
+  },
+  "test049": {
+    "description": "Ethiopia",
+    "seed": "2",
+    "snake_grows": "0",
+    "key_input": "",
+    "name": "እግርህን በፍራሽህ ልክ ዘርጋ።",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XGS...............GX",
+        "XG................GX",
+        "XG........?.......GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ],
+      "name": "እግርህን በፍራሽህ ልክ ዘርጋ።",
+      "name_len": 19
+    }
+  },
+  "test050": {
+    "description": "Arabic",
+    "seed": "2",
+    "snake_grows": "0",
+    "key_input": "",
+    "name": "صثيسصلرتهغلىنهقءتععععقي اترتارىنخاىججفقلببيشضص111صيسغ ىنؤؤربام ظظظزمطت",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XGS...............GX",
+        "XG................GX",
+        "XG........?.......GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ],
+      "name": "صثيسصلرتهغلىنهقءتععععقي اترتارىنخاىججفقلببيشضص111صيسغ ىنؤؤربام ظظظزمطت",
+      "name_len": 70
+    }
+  },
+  "test051": {
+    "description": "Allah..gracious..merciful",
+    "seed": "2",
+    "snake_grows": "0",
+    "key_input": "",
+    "name": "﷽",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XGS...............GX",
+        "XG................GX",
+        "XG........?.......GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ],
+      "name": "﷽",
+      "name_len": 1
+    }
+  },
+  "test052": {
+    "description": "Sumerian Cuneiform",
+    "seed": "2",
+    "snake_grows": "0",
+    "key_input": "",
+    "name": "𒀀𒀁𒀂𒀃𒀄𒁃𒁂",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XGS...............GX",
+        "XG................GX",
+        "XG........?.......GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ],
+      "name": "𒀀𒀁𒀂𒀃𒀄𒁃𒁂",
+      "name_len": 7
+    }
+  },
+  "test053": {
+    "description": "Emoji",
+    "seed": "2",
+    "snake_grows": "0",
+    "key_input": "",
+    "name": "Bro 😳 is ➖ it possible ❓ to somehow 🧙‍♂️ port this ☝️ to android 🍎",
+    "output": {
+      "game_over": 0,
+      "score": 0,
+      "width": 20,
+      "height": 10,
+      "cells": [
+        "XXXXXXXXXXXXXXXXXXXX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XGS...............GX",
+        "XG................GX",
+        "XG........?.......GX",
+        "XG................GX",
+        "XG................GX",
+        "XG................GX",
+        "XGGGGGGGGGGGGGGGGGGX",
+        "XXXXXXXXXXXXXXXXXXXX"
+      ],
+      "name": "Bro 😳 is ➖ it possible ❓ to somehow 🧙‍♂️ port this ☝️ to android 🍎",
+      "name_len": 66
+    }
+  }
+}
+
