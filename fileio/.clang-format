@@ -1,0 +1,7 @@
+---
+BasedOnStyle: google
+IndentWidth: 4
+DerivePointerAlignment: false
+PointerAlignment: Left
+ReflowComments: false
+---
