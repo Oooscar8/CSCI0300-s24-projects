@@ -23,10 +23,6 @@ Project 5A - Concurrent Store
 
 <!-- answer here!-->
 
-### Q4.
-
-<!-- answer here!-->
-
 ## Approximately how long did it take to complete the Concurrent Store portion of KVStore?
 
 <!-- Enter an approximate number of hours that you spent actively working on the project. -->
