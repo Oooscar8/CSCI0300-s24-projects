@@ -1,0 +1,8 @@
+.DS_Store
+.idea/
+build/*
+!build/Makefile
+!build/test.sh
+!build/plot_performance.py
+!build/run_tests
+!tests/
