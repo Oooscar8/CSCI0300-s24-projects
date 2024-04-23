@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
     threads.push_back(std::async(std::launch::async, [&, tid = i]() {
       auto start = tid * elems_per_thr;
       auto end = start + elems_per_thr;
-      if (i % 10 == 0) {
+      if (tid % 10 == 0) {
         store->AllKeys();
       }
       return del_range(*store, keys, vals, start, end);
