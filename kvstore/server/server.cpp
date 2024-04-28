@@ -144,14 +144,22 @@ bool KvServer::process_config() {
     return false;
   }
 
-  // to_transfer maps server --> [<vector of keys to transfer>, <vector of
-  // values to transfer>] You're free to use a different data structure if you'd
+  // TODO: Update this->config to reflect the result from querying the
+  // shardcontroller
+
+  // to_transfer maps server --> [<vector of keys to transfer to server>,
+  // <vector of values to transfer to server>]
+  // You're free to use a different data structure if you'd
   // like, although note you'll have to change our transferring code if you do
   std::map<std::string, std::array<std::vector<std::string>, 2>> to_transfer;
 
-  // TODO: Go through all of the server's key-value pairs and check if this
-  // server is still responsible for them. If not, add the key-value pairs to
-  // to_transfer and delete them from this server's store.
+  // TODO:
+  //  1. Get all of the server's key-value pairs (which KvStore functions might
+  //  help you with this?)
+  //  2. For each pair, check if the server is still responsible for it.
+  //  If the server is no longer responsible for the pair,
+  //  add the pair to_transfer under the key of the newly-responsible (i.e.,
+  //  destination) server and delete the pair from this server's store.
 
   // NOTE: Comment this in to transfer the keys!
   // // for each server responsible for moved keys:

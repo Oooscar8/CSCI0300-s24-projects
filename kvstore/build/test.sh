@@ -24,9 +24,12 @@ TEST_SECTIONS=(
     "A3"
     "A4"
     "A5"
+    "B1"
+    "B2"
+    "B3"
 )
 
-TEST_DIRS=("kvstore_sequential_tests" "kvstore_parallel_tests" "kvstore_performance_tests")
+TEST_DIRS=("kvstore_sequential_tests" "kvstore_parallel_tests" "kvstore_performance_tests" "shardcontroller_tests" "server_tests" "shardkv_client_tests")
 
 declare -A SECTION_DIRS
 SECTION_DIRS["A1"]="kvstore_sequential_tests"
@@ -34,9 +37,9 @@ SECTION_DIRS["A2"]="kvstore_parallel_tests"
 SECTION_DIRS["A3"]="kvstore_sequential_tests"
 SECTION_DIRS["A4"]="kvstore_parallel_tests"
 SECTION_DIRS["A5"]="kvstore_performance_tests"
-SECTION_DIRS["B1"]=""
-SECTION_DIRS["B2"]=""
-SECTION_DIRS["B3"]=""
+SECTION_DIRS["B1"]="shardcontroller_tests"
+SECTION_DIRS["B2"]="server_tests"
+SECTION_DIRS["B3"]="shardkv_client_tests"
 
 declare -A SECTION_ARGS
 SECTION_ARGS["A1"]="simple"

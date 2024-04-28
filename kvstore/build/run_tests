@@ -9,13 +9,19 @@ TEST_SECTIONS=(
 )
 
 if [ $# -eq 0 ]; then
-  ./test.sh "A1" "A2" "A3" "A4" "A5"
+  ./test.sh "A1" "A2" "A3" "A4" "A5" "B1" "B2" "B3"
 elif [ $# -eq 1 ]; then
   case $1 in
     "concurrent_store")
       ./test.sh "A1" "A2" "A3" "A4" "A5"
       ;;
+    "5A")
+      ./test.sh "A1" "A2" "A3" "A4" "A5"
+      ;;
     "distributed_store")
+      ./test.sh "B1" "B2" "B3"
+      ;;
+    "5B")
       ./test.sh "B1" "B2" "B3"
       ;;
     *)
