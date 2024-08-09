@@ -72,4 +72,5 @@ void read_name(char* write_into) {
  */
 void teardown(int* cells, snake_t* snake_p) {
     // TODO: implement!
+    free(cells);
 }
