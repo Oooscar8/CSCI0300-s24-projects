@@ -36,27 +36,58 @@ void update(int* cells, size_t width, size_t height, snake_t* snake_p,
     // update g_game_over, g_score, snake_position, snake_direction
 
     // update snake's position
-    if (cells[snake_position + 1] == FLAG_WALL) {
+    switch (input) {
+        case INPUT_RIGHT:
+            direction = RIGHT;
+            break;
+        case INPUT_LEFT:
+            direction = LEFT;
+            break;
+        case INPUT_UP:
+            direction = UP;
+            break;
+        case INPUT_DOWN:
+            direction = DOWN;
+            break;
+        default:
+            break;
+    }
+
+    int next;
+    switch (direction) {
+        case RIGHT:
+            next = snake_position + 1;
+            break;
+        case LEFT:
+            next = snake_position - 1;
+            break;
+        case UP:
+            next = snake_position - width;
+            break;
+        case DOWN:
+            next = snake_position + width;
+            break;
+    }
+
+    if (cells[next] == FLAG_WALL) {
         g_game_over = 1;
         return;
     }
 
-    if (cells[snake_position] == FLAG_SNAKE) {
-        if (*(cells + snake_position + 1) == FLAG_GRASS) {
-            cells[snake_position] = PLAIN_CELL;
-            *(cells + snake_position + 1) = FLAG_SNAKE | FLAG_GRASS;
-        } else {
-            cells[snake_position] = PLAIN_CELL;
-            *(cells + snake_position + 1) = FLAG_SNAKE;
-        }
-    } else if (*(cells + snake_position + 1) == FLAG_GRASS) {
-        cells[snake_position] = cells[snake_position] ^ FLAG_SNAKE;
-        *(cells + snake_position + 1) = FLAG_SNAKE | FLAG_GRASS;
-    } else {
-        cells[snake_position] = cells[snake_position] ^ FLAG_SNAKE;
-        *(cells + snake_position + 1) = FLAG_SNAKE;
+    cells[snake_position] ^= FLAG_SNAKE;  // snake leave the cell
+
+    if (cells[next] & FLAG_FOOD) {
+        place_food(cells, width, height);
+        g_score += 1;
     }
-    snake_position += 1;
+
+    if (cells[next] & FLAG_GRASS) {
+        cells[next] = FLAG_SNAKE | FLAG_GRASS;
+    } else {
+        cells[next] = FLAG_SNAKE;
+    }
+
+    snake_position = next;
 }
 
 /** Sets a random space on the given board to food.

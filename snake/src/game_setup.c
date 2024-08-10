@@ -94,8 +94,11 @@ enum board_init_status initialize_game(int** cells_p, size_t* width_p,
     g_game_over = 0;
     g_score = 0;
     snake_position = 20 * 2 + 2;
+    direction = RIGHT;
 
-    return initialize_default_board(cells_p, width_p, height_p);
+    enum board_init_status initBoardStatus = initialize_default_board(cells_p, width_p, height_p);
+    place_food(*cells_p, 20, 10);
+    return initBoardStatus;
 }
 
 /** Takes in a string `compressed` and initializes values pointed to by

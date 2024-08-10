@@ -131,7 +131,7 @@ int main(int argc, char** argv) {
     // TODO: implement the game loop here (Part 1A)!
     while (g_game_over == 0) {
         usleep(100000);
-        update(cells, width, height, NULL, INPUT_NONE, 0);
+        update(cells, width, height, NULL, get_input(), 0);
         render_game(cells, width, height);
     }
     end_game(cells, width, height, &snake);
