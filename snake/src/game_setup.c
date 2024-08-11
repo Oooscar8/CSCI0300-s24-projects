@@ -126,7 +126,7 @@ enum board_init_status decompress_board_str(int** cells_p, size_t* width_p,
     // TODO: implement!
     int i = 0, count = 0;
     while (compressed[i] != '\0') {
-        if (compressed[i] = '|') {
+        if (compressed[i] == '|') {
             count += 1;
         }
     }
@@ -139,34 +139,90 @@ enum board_init_status decompress_board_str(int** cells_p, size_t* width_p,
         return INIT_ERR_BAD_CHAR;
     }
     token -= token[0];
-    if (atoi(token[0]) != count) {
+    if (token[0] - '0' != count) {
         return INIT_ERR_INCORRECT_DIMENSIONS;
     }
     *height_p = count;
 
     // save the board's width at the begining
     token = strtok(NULL, delim);
-    int board_width = atoi(token);
+    *width_p = atoi(token);
+    // if 'x' does not exist, return error
+    if (*width_p == 0) {
+        return INIT_ERR_BAD_CHAR;
+    }
+
+    *cells_p = malloc((*width_p) * (*height_p) * sizeof(int));
 
     // B7x10|W10|W1E4W5|W2E5G2W1|W1E8W1|W1E4W1E3W1|W1E2S1E1W1E3W1|W10
     // initially token = 'w10',then token = 'W1E4W5'...
-    int has_snake = 0;  // number of snakes
-    int current_row = 0;
+    int has_snake = 0;    // number of snakes
+    int current_row = 0;  // current operating row
     token = strtok(NULL, delim);
     while (token != NULL) {
-        int actual_board_width = 0;
+        int current_column = 0;  // current operating column
         int j = 0;
-        int current_column = 0;
-        int num = 0;
+        char current_alpha;
         while (token[j] != '\0') {
-            //do operation here
-            while (isdigit(token[j])) {
-                num += atoi(token[j]);
+            if (is_valid_alphabet(token[j])) {
+                current_alpha = token[j];
+            } else {
+                return INIT_ERR_BAD_CHAR;
             }
+            ++j;
+            int num = 0;  // the number of each wall/grass/empty/snake
+            while (!is_valid_alphabet(token[j])) {
+                num += token[j] - '0';
+                ++j;
+            }
+            if (current_alpha == 'S') {
+                if (num != 1 || has_snake == 1) {
+                    return INIT_ERR_WRONG_SNAKE_NUM;
+                }
+                has_snake = 1;
+                initialize(current_alpha, num, current_row, current_column,
+                           cells_p, width_p, height_p);
+            } else {
+                initialize(current_alpha, num, current_row, current_column,
+                           cells_p, width_p, height_p);
+            }
+            current_column += num;
+        }
+        if (current_column != (int)*width_p) {
+            return INIT_ERR_INCORRECT_DIMENSIONS;
         }
         token = strtok(NULL, delim);
         current_row += 1;
     }
+    return INIT_SUCCESS;
+}
 
-    return INIT_UNIMPLEMENTED;
+int is_valid_alphabet(char alpha) {
+    if (alpha == 'W' || alpha == 'E' || alpha == 'S' || alpha == 'G') {
+        return 1;
+    }
+    return 0;
+}
+
+void initialize(char alpha, int num, int row, int column, int** cells_p,
+                size_t* width_p, size_t* height_p) {
+    int* cells = *cells_p;
+    if (alpha == 'W') {
+        for (int i = 0; i < num; ++i) {
+            cells[row * *width_p + column + i] = FLAG_WALL;
+        }
+    }
+    if (alpha == 'E') {
+        for (int i = 0; i < num; ++i) {
+            cells[row * *width_p + column + i] = PLAIN_CELL;
+        }
+    }
+    if (alpha == 'G') {
+        for (int i = 0; i < num; ++i) {
+            cells[row * *width_p + column + i] = FLAG_GRASS;
+        }
+    }
+    if (alpha == 'S') {
+        cells[row * *width_p + column] = FLAG_SNAKE;
+    }
 }

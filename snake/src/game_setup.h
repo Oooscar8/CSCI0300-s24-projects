@@ -31,5 +31,8 @@ enum board_init_status decompress_board_str(int** cells_p, size_t* width_p,
                                             char* compressed);
 enum board_init_status initialize_default_board(int** cells_p, size_t* width_p,
                                                 size_t* height_p);
+int is_valid_alphabet(char alpha);
+void initialize(char alpha, int num, int row, int column, int** cells_p,
+                size_t* width_p, size_t* height_p);
 
 #endif
