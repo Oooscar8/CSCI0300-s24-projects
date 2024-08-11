@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
 
     // Check validity of the board before rendering!
     // TODO: Implement (in Part 2)
-    // if ( ? board is not valid ? ) { return EXIT_FAILURE; }
+    if (status != INIT_SUCCESS) { return EXIT_FAILURE; }
 
     // Read in the player's name & save its name and length
     // TODO: Implement (in Part 3B)

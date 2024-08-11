@@ -1,12 +1,12 @@
 #include "game_setup.h"
 
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
 
-#include "game.h"
 #include "common.h"
+#include "game.h"
 
 // Some handy dandy macros for decompression
 #define E_CAP_HEX 0x45
@@ -96,7 +96,13 @@ enum board_init_status initialize_game(int** cells_p, size_t* width_p,
     snake_position = 20 * 2 + 2;
     direction = RIGHT;
 
-    enum board_init_status initBoardStatus = initialize_default_board(cells_p, width_p, height_p);
+    enum board_init_status initBoardStatus;
+    if (board_rep != NULL) {
+        initBoardStatus = decompress_board_str(cells_p, width_p, height_p,
+                                               snake_p, board_rep);
+    } else {
+        initBoardStatus = initialize_default_board(cells_p, width_p, height_p);
+    }
     place_food(*cells_p, 20, 10);
     return initBoardStatus;
 }
@@ -118,5 +124,49 @@ enum board_init_status decompress_board_str(int** cells_p, size_t* width_p,
                                             size_t* height_p, snake_t* snake_p,
                                             char* compressed) {
     // TODO: implement!
+    int i = 0, count = 0;
+    while (compressed[i] != '\0') {
+        if (compressed[i] = '|') {
+            count += 1;
+        }
+    }
+
+    const char delim[] = "x|";
+
+    // complete judge before 'x'
+    char* token = strtok(compressed, delim);
+    if (token[0] != 'B') {
+        return INIT_ERR_BAD_CHAR;
+    }
+    token -= token[0];
+    if (atoi(token[0]) != count) {
+        return INIT_ERR_INCORRECT_DIMENSIONS;
+    }
+    *height_p = count;
+
+    // save the board's width at the begining
+    token = strtok(NULL, delim);
+    int board_width = atoi(token);
+
+    // B7x10|W10|W1E4W5|W2E5G2W1|W1E8W1|W1E4W1E3W1|W1E2S1E1W1E3W1|W10
+    // initially token = 'w10',then token = 'W1E4W5'...
+    int has_snake = 0;  // number of snakes
+    int current_row = 0;
+    token = strtok(NULL, delim);
+    while (token != NULL) {
+        int actual_board_width = 0;
+        int j = 0;
+        int current_column = 0;
+        int num = 0;
+        while (token[j] != '\0') {
+            //do operation here
+            while (isdigit(token[j])) {
+                num += atoi(token[j]);
+            }
+        }
+        token = strtok(NULL, delim);
+        current_row += 1;
+    }
+
     return INIT_UNIMPLEMENTED;
 }
