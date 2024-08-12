@@ -33,9 +33,8 @@ void update(int* cells, size_t width, size_t height, snake_t* snake_p,
 
     // TODO: implement!
 
-    // update g_game_over, g_score, snake_position, snake_direction
+    // update g_game_over, g_score, snake_position, direction
 
-    // update snake's position
     switch (input) {
         case INPUT_RIGHT:
             direction = RIGHT;

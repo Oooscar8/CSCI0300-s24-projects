@@ -93,7 +93,6 @@ enum board_init_status initialize_game(int** cells_p, size_t* width_p,
     // TODO: implement!
     g_game_over = 0;
     g_score = 0;
-    snake_position = 20 * 2 + 2;
     direction = RIGHT;
 
     enum board_init_status initBoardStatus;
@@ -102,6 +101,7 @@ enum board_init_status initialize_game(int** cells_p, size_t* width_p,
                                                snake_p, board_rep);
     } else {
         initBoardStatus = initialize_default_board(cells_p, width_p, height_p);
+        snake_position = 20 * 2 + 2;
     }
     if (initBoardStatus == INIT_SUCCESS) {
         place_food(*cells_p, *width_p, *height_p);
@@ -250,5 +250,6 @@ void initialize(char alpha, int num, int row, int column, int** cells_p,
     }
     if (alpha == 'S') {
         cells[row * *width_p + column] = FLAG_SNAKE;
+        snake_position = row * *width_p + column;
     }
 }
