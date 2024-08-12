@@ -103,7 +103,9 @@ enum board_init_status initialize_game(int** cells_p, size_t* width_p,
     } else {
         initBoardStatus = initialize_default_board(cells_p, width_p, height_p);
     }
-    place_food(*cells_p, 20, 10);
+    if (initBoardStatus == INIT_SUCCESS) {
+        place_food(*cells_p, *width_p, *height_p);
+    }
     return initBoardStatus;
 }
 
@@ -129,6 +131,7 @@ enum board_init_status decompress_board_str(int** cells_p, size_t* width_p,
         if (compressed[i] == '|') {
             count += 1;
         }
+        ++i;
     }
 
     const char delim[] = "x|";
@@ -138,7 +141,7 @@ enum board_init_status decompress_board_str(int** cells_p, size_t* width_p,
     if (token[0] != 'B') {
         return INIT_ERR_BAD_CHAR;
     }
-    token -= token[0];
+    token += 1;
     if (token[0] - '0' != count) {
         return INIT_ERR_INCORRECT_DIMENSIONS;
     }
@@ -171,10 +174,13 @@ enum board_init_status decompress_board_str(int** cells_p, size_t* width_p,
             }
             ++j;
             int num = 0;  // the number of each wall/grass/empty/snake
-            while (!is_valid_alphabet(token[j])) {
+            /**
+             * Code below is buggy! need fixed! num calculation is wrong and while condition is wrong!
+            while (!is_valid_alphabet(token[j]) && token[j] != '\0') {
                 num += token[j] - '0';
                 ++j;
             }
+            */
             if (current_alpha == 'S') {
                 if (num != 1 || has_snake == 1) {
                     return INIT_ERR_WRONG_SNAKE_NUM;
