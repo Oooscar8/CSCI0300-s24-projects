@@ -126,6 +126,8 @@ enum board_init_status decompress_board_str(int** cells_p, size_t* width_p,
                                             size_t* height_p, snake_t* snake_p,
                                             char* compressed) {
     // TODO: implement!
+    *cells_p = NULL;
+
     int i = 0, count = 0;
     while (compressed[i] != '\0') {
         if (compressed[i] == '|') {
@@ -142,7 +144,7 @@ enum board_init_status decompress_board_str(int** cells_p, size_t* width_p,
         return INIT_ERR_BAD_CHAR;
     }
     token += 1;
-    if (token[0] - '0' != count) {
+    if (atoi(token) != count) {
         return INIT_ERR_INCORRECT_DIMENSIONS;
     }
     *height_p = count;
@@ -174,16 +176,24 @@ enum board_init_status decompress_board_str(int** cells_p, size_t* width_p,
             }
             ++j;
             int num = 0;  // the number of each wall/grass/empty/snake
-            /**
-             * Code below is buggy! need fixed! num calculation is wrong and while condition is wrong!
-            while (!is_valid_alphabet(token[j]) && token[j] != '\0') {
-                num += token[j] - '0';
+            char* m = malloc(*width_p);
+            int n = 0;
+            while (is_valid_number(token[j])) {
+                m[n] = token[j];
+                ++n;
                 ++j;
             }
-            */
+            num = atoi(m);
+            free(m);
+            if (current_alpha != 'S' && current_column + num > (int)*width_p) {
+                return INIT_ERR_INCORRECT_DIMENSIONS;
+            }
             if (current_alpha == 'S') {
                 if (num != 1 || has_snake == 1) {
                     return INIT_ERR_WRONG_SNAKE_NUM;
+                }
+                if (current_column + 1 > (int)*width_p) {
+                    return INIT_ERR_INCORRECT_DIMENSIONS;
                 }
                 has_snake = 1;
                 initialize(current_alpha, num, current_row, current_column,
@@ -200,11 +210,21 @@ enum board_init_status decompress_board_str(int** cells_p, size_t* width_p,
         token = strtok(NULL, delim);
         current_row += 1;
     }
+    if (has_snake == 0) {
+        return INIT_ERR_WRONG_SNAKE_NUM;
+    }
     return INIT_SUCCESS;
 }
 
 int is_valid_alphabet(char alpha) {
     if (alpha == 'W' || alpha == 'E' || alpha == 'S' || alpha == 'G') {
+        return 1;
+    }
+    return 0;
+}
+
+int is_valid_number(char num) {
+    if (num - '0' >= 0 && num - '0' <= 9) {
         return 1;
     }
     return 0;
