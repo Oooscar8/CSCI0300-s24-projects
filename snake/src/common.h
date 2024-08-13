@@ -21,11 +21,8 @@
  * INPUT_UP, INPUT_DOWN, INPUT_LEFT, INPUT_RIGHT, and INPUT_NONE.
  */
 enum input_key { INPUT_UP, INPUT_DOWN, INPUT_LEFT, INPUT_RIGHT, INPUT_NONE };
-
-// TODO: declare global variables needed for your snake (as `extern`)! (part 1A)
-extern int snake_position;
 enum snake_direction {UP, DOWN, LEFT, RIGHT};
-extern enum snake_direction direction;
+// TODO: declare global variables needed for your snake (as `extern`)! (part 1A)
 
 /** Global variables for game status.
  *
@@ -47,6 +44,8 @@ extern int g_score;      // game score: 1 point for every food eaten
 typedef struct snake {
     // TODO: Define your snake struct! (in ')
     // Store any necessary information about your snake here.
+    int snake_position;
+    enum snake_direction direction;
 } snake_t;
 
 void set_seed(unsigned seed);

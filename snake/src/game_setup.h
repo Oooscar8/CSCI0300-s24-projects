@@ -34,6 +34,6 @@ enum board_init_status initialize_default_board(int** cells_p, size_t* width_p,
 int is_valid_alphabet(char alpha);
 int is_valid_number(char num);
 void initialize(char alpha, int num, int row, int column, int** cells_p,
-                size_t* width_p, size_t* height_p);
+                size_t* width_p, size_t* height_p, snake_t** snake_p);
 
 #endif

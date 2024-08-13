@@ -93,7 +93,7 @@ enum board_init_status initialize_game(int** cells_p, size_t* width_p,
     // TODO: implement!
     g_game_over = 0;
     g_score = 0;
-    direction = RIGHT;
+    snake_p->direction = RIGHT;
 
     enum board_init_status initBoardStatus;
     if (board_rep != NULL) {
@@ -101,7 +101,7 @@ enum board_init_status initialize_game(int** cells_p, size_t* width_p,
                                                snake_p, board_rep);
     } else {
         initBoardStatus = initialize_default_board(cells_p, width_p, height_p);
-        snake_position = 20 * 2 + 2;
+        snake_p->snake_position = 20 * 2 + 2;
     }
     if (initBoardStatus == INIT_SUCCESS) {
         place_food(*cells_p, *width_p, *height_p);
@@ -197,10 +197,10 @@ enum board_init_status decompress_board_str(int** cells_p, size_t* width_p,
                 }
                 has_snake = 1;
                 initialize(current_alpha, num, current_row, current_column,
-                           cells_p, width_p, height_p);
+                           cells_p, width_p, height_p, &snake_p);
             } else {
                 initialize(current_alpha, num, current_row, current_column,
-                           cells_p, width_p, height_p);
+                           cells_p, width_p, height_p, &snake_p);
             }
             current_column += num;
         }
@@ -231,7 +231,7 @@ int is_valid_number(char num) {
 }
 
 void initialize(char alpha, int num, int row, int column, int** cells_p,
-                size_t* width_p, size_t* height_p) {
+                size_t* width_p, size_t* height_p, snake_t** snake_p) {
     int* cells = *cells_p;
     if (alpha == 'W') {
         for (int i = 0; i < num; ++i) {
@@ -250,6 +250,6 @@ void initialize(char alpha, int num, int row, int column, int** cells_p,
     }
     if (alpha == 'S') {
         cells[row * *width_p + column] = FLAG_SNAKE;
-        snake_position = row * *width_p + column;
+        (*snake_p)->snake_position = row * *width_p + column;
     }
 }

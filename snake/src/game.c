@@ -37,34 +37,34 @@ void update(int* cells, size_t width, size_t height, snake_t* snake_p,
 
     switch (input) {
         case INPUT_RIGHT:
-            direction = RIGHT;
+            snake_p->direction = RIGHT;
             break;
         case INPUT_LEFT:
-            direction = LEFT;
+            snake_p->direction = LEFT;
             break;
         case INPUT_UP:
-            direction = UP;
+            snake_p->direction = UP;
             break;
         case INPUT_DOWN:
-            direction = DOWN;
+            snake_p->direction = DOWN;
             break;
         default:
             break;
     }
 
     int next;
-    switch (direction) {
+    switch (snake_p->direction) {
         case RIGHT:
-            next = snake_position + 1;
+            next = snake_p->snake_position + 1;
             break;
         case LEFT:
-            next = snake_position - 1;
+            next = snake_p->snake_position - 1;
             break;
         case UP:
-            next = snake_position - width;
+            next = snake_p->snake_position - width;
             break;
         case DOWN:
-            next = snake_position + width;
+            next = snake_p->snake_position + width;
             break;
     }
 
@@ -73,7 +73,7 @@ void update(int* cells, size_t width, size_t height, snake_t* snake_p,
         return;
     }
 
-    cells[snake_position] ^= FLAG_SNAKE;  // snake leave the cell
+    cells[snake_p->snake_position] ^= FLAG_SNAKE;  // snake leave the cell
 
     if (cells[next] & FLAG_FOOD) {
         place_food(cells, width, height);
@@ -86,7 +86,7 @@ void update(int* cells, size_t width, size_t height, snake_t* snake_p,
         cells[next] = FLAG_SNAKE;
     }
 
-    snake_position = next;
+    snake_p->snake_position = next;
 }
 
 /** Sets a random space on the given board to food.
