@@ -2,7 +2,6 @@
 #define COMMON_H
 
 #include <stddef.h>
-#include "linked_list.h"
 
 // Let's see if we can keep this as simple as possible, lest we intimidate
 // students looking through the provided code.
@@ -45,7 +44,7 @@ extern int g_score;      // game score: 1 point for every food eaten
 typedef struct snake {
     // TODO: Define your snake struct! (in ')
     // Store any necessary information about your snake here.
-    node_t* snake_position_list;
+    int snake_position;
     enum snake_direction direction;
 } snake_t;
 
