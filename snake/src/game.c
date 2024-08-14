@@ -34,17 +34,33 @@ void update(int* cells, size_t width, size_t height, snake_t* snake_p,
     // TODO: implement!
 
     // update g_game_over, g_score, snake_position, direction
+    if (g_game_over == 1) {
+        return;
+    }
+    
     switch (input) {
         case INPUT_RIGHT:
+            if (snake_p->direction == LEFT && length_list(snake_p->snake_position_list) >= 2) {
+                break;
+            }
             snake_p->direction = RIGHT;
             break;
         case INPUT_LEFT:
+            if (snake_p->direction == RIGHT && length_list(snake_p->snake_position_list) >= 2) {
+                break;
+            }
             snake_p->direction = LEFT;
             break;
         case INPUT_UP:
+            if (snake_p->direction == DOWN && length_list(snake_p->snake_position_list) >= 2) {
+                break;
+            }
             snake_p->direction = UP;
             break;
         case INPUT_DOWN:
+            if (snake_p->direction == UP && length_list(snake_p->snake_position_list) >= 2) {
+                break;
+            }
             snake_p->direction = DOWN;
             break;
         default:
@@ -72,12 +88,25 @@ void update(int* cells, size_t width, size_t height, snake_t* snake_p,
         return;
     }
 
-    cells[*(int*)snake_p->snake_position_list->data] ^=
-        FLAG_SNAKE;  // snake leave the cell
+    node_t* iterator = snake_p->snake_position_list;
+    while(iterator->next) {
+        if (next == *(int*)iterator->data) {
+            g_game_over = 1;
+            return;
+        }
+        iterator = iterator->next;
+    }
+
+    insert_first(&snake_p->snake_position_list, &next, sizeof(int));
 
     if (cells[next] & FLAG_FOOD) {
         place_food(cells, width, height);
         g_score += 1;
+    }
+    if (!(cells[next] & FLAG_FOOD) || growing == 0) {
+        int* last_position = remove_last(&snake_p->snake_position_list);
+        cells[*last_position] ^= FLAG_SNAKE;  // snake leave the cell
+        free(last_position);
     }
 
     if (cells[next] & FLAG_GRASS) {
@@ -85,9 +114,6 @@ void update(int* cells, size_t width, size_t height, snake_t* snake_p,
     } else {
         cells[next] = FLAG_SNAKE;
     }
-
-    free(remove_last(&snake_p->snake_position_list));
-    insert_first(&snake_p->snake_position_list, &next, sizeof(int));
 }
 
 /** Sets a random space on the given board to food.
