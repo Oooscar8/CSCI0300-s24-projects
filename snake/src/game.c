@@ -72,7 +72,8 @@ void update(int* cells, size_t width, size_t height, snake_t* snake_p,
         return;
     }
 
-    cells[*(int*)snake_p->snake_position_list->data] ^= FLAG_SNAKE;  // snake leave the cell
+    cells[*(int*)snake_p->snake_position_list->data] ^=
+        FLAG_SNAKE;  // snake leave the cell
 
     if (cells[next] & FLAG_FOOD) {
         place_food(cells, width, height);
@@ -129,4 +130,7 @@ void read_name(char* write_into) {
 void teardown(int* cells, snake_t* snake_p) {
     // TODO: implement!
     free(cells);
+    while (snake_p->snake_position_list) {
+        remove_last(&snake_p->snake_position_list);
+    }
 }

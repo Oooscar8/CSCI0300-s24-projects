@@ -252,7 +252,6 @@ void initialize(char alpha, int num, int row, int column, int** cells_p,
     }
     if (alpha == 'S') {
         cells[row * *width_p + column] = FLAG_SNAKE;
-        remove_last(&(*snake_p)->snake_position_list);
         int snake_position = row * *width_p + column;
         insert_first(&(*snake_p)->snake_position_list, &snake_position, sizeof(int));
     }
