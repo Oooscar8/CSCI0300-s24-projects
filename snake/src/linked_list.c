@@ -282,7 +282,6 @@ void *remove_first(node_t **head_list)
   }
 
   void *currData = curr->data;
-  free(curr->data);
   free(curr);
   return currData;
 }
@@ -317,7 +316,6 @@ void *remove_last(node_t **head_list)
   {
     curr->prev->next = NULL;
   }
-  free(curr->data);
   free(curr);
   return removed_element;
 }

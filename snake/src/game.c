@@ -86,7 +86,7 @@ void update(int* cells, size_t width, size_t height, snake_t* snake_p,
         cells[next] = FLAG_SNAKE;
     }
 
-    remove_last(&snake_p->snake_position_list);
+    free(remove_last(&snake_p->snake_position_list));
     insert_first(&snake_p->snake_position_list, &next, sizeof(int));
 }
 
@@ -131,6 +131,6 @@ void teardown(int* cells, snake_t* snake_p) {
     // TODO: implement!
     free(cells);
     while (snake_p->snake_position_list) {
-        remove_last(&snake_p->snake_position_list);
+        free(remove_last(&snake_p->snake_position_list));
     }
 }
