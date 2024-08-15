@@ -1,16 +1,16 @@
 #define _XOPEN_SOURCE_EXTENDED 1
 #include <curses.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <stddef.h>
 
+#include "common.h"
 #include "game.h"
 #include "game_over.h"
 #include "game_setup.h"
 #include "mbstrings.h"
 #include "render.h"
-#include "common.h"
 
 /** Gets the next input from the user, or returns INPUT_NONE if no input is
  * provided quickly enough.
@@ -45,14 +45,12 @@ void end_game(int* cells, size_t width, size_t height, snake_t* snake_p) {
     teardown(cells, snake_p);
 
     // ****************** UNCOMMENT THIS CODE IN PART 3B ***********************
-    /*
     // Render final GAME OVER PRESS ANY KEY TO EXIT screen
     render_game_over(width, height);
     usleep(1000 * 1000);  // 1000ms
     cbreak(); // Leave halfdelay mode
     getch();
-    */
-
+    
     // tell ncurses that we're done
     endwin();
 }
@@ -108,14 +106,18 @@ int main(int argc, char** argv) {
 
     // Check validity of the board before rendering!
     // TODO: Implement (in Part 2)
-    if (status != INIT_SUCCESS) { return EXIT_FAILURE; }
+    if (status != INIT_SUCCESS) {
+        return EXIT_FAILURE;
+    }
 
     // Read in the player's name & save its name and length
     // TODO: Implement (in Part 3B)
-    // char name_buffer[1000];
-    // read_name(name_buffer);
+    char name_buffer[1000];
+    read_name(name_buffer);
     // ? save name_buffer ?
+    g_name = name_buffer;
     // ? save mbslen(name_buffer) ?
+    g_name_len = mbslen(name_buffer);
 
     // TODO: Remove this message, uncomment the code below this message
     //       and implement Part 1A here.

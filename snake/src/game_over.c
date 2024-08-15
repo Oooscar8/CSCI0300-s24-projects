@@ -20,8 +20,8 @@
  *  - width: width of the board
  *  - height: height of the board
  */
-// ****************** TODO UNCOMMENT THIS CODE IN PART 3B ***********************
-/*
+// ****************** TODO UNCOMMENT THIS CODE IN PART 3B
+// ***********************
 void render_game_over(size_t width, size_t height) {
     // DO NOT MODIFY THE CONTENTS OF THIS FUNCTION
     int y_center = ((int)height / 2);
@@ -39,4 +39,3 @@ void render_game_over(size_t width, size_t height) {
 
     refresh();
 }
-*/

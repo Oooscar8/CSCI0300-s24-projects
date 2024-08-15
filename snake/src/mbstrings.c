@@ -26,5 +26,25 @@
  */
 size_t mbslen(const char* bytes) {
     // TODO: implement!
-    return 0;
+    if (bytes == NULL) {
+        return -1;
+    }
+    size_t len = 0;
+    while (*bytes) {
+        char current_bytes = *bytes;
+        int ones = 0;
+        while ((current_bytes & (~current_bytes + 0b10000000)) == 0b10000000) {
+            current_bytes = current_bytes << 1;
+            ones += 1;
+        }
+        if (ones == 0) {
+            bytes += 1;
+        } else if (ones == 1) {
+            return -1;
+        } else {
+            bytes += ones;
+        }
+        len += 1;
+    }
+    return len;
 }

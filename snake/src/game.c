@@ -37,28 +37,32 @@ void update(int* cells, size_t width, size_t height, snake_t* snake_p,
     if (g_game_over == 1) {
         return;
     }
-    
+
     switch (input) {
         case INPUT_RIGHT:
-            if (snake_p->direction == LEFT && length_list(snake_p->snake_position_list) >= 2) {
+            if (snake_p->direction == LEFT &&
+                length_list(snake_p->snake_position_list) >= 2) {
                 break;
             }
             snake_p->direction = RIGHT;
             break;
         case INPUT_LEFT:
-            if (snake_p->direction == RIGHT && length_list(snake_p->snake_position_list) >= 2) {
+            if (snake_p->direction == RIGHT &&
+                length_list(snake_p->snake_position_list) >= 2) {
                 break;
             }
             snake_p->direction = LEFT;
             break;
         case INPUT_UP:
-            if (snake_p->direction == DOWN && length_list(snake_p->snake_position_list) >= 2) {
+            if (snake_p->direction == DOWN &&
+                length_list(snake_p->snake_position_list) >= 2) {
                 break;
             }
             snake_p->direction = UP;
             break;
         case INPUT_DOWN:
-            if (snake_p->direction == UP && length_list(snake_p->snake_position_list) >= 2) {
+            if (snake_p->direction == UP &&
+                length_list(snake_p->snake_position_list) >= 2) {
                 break;
             }
             snake_p->direction = DOWN;
@@ -89,7 +93,7 @@ void update(int* cells, size_t width, size_t height, snake_t* snake_p,
     }
 
     node_t* iterator = snake_p->snake_position_list;
-    while(iterator->next) {
+    while (iterator->next) {
         if (next == *(int*)iterator->data) {
             g_game_over = 1;
             return;
@@ -143,7 +147,16 @@ void place_food(int* cells, size_t width, size_t height) {
 void read_name(char* write_into) {
     // TODO: implement! (remove the call to strcpy once you begin your
     // implementation)
-    strcpy(write_into, "placeholder");
+    while (true) {
+        printf("Name > ");
+        fflush(0);
+        int bytes = (int)read(0, write_into, 1000);
+        if (bytes > 1) {
+            write_into[bytes - 1] = '\0';
+            break;
+        }
+        printf("\nName Invalid: must be longer than 0 characters.\n");
+    }
 }
 
 /** Cleans up on game over — should free any allocated memory so that the
