@@ -7,6 +7,8 @@
 struct dmalloc_stats m_stats = {0, 0, 0, 0, 0, 0, 0xffffffffffffffff, 0};
 struct metadata {
     unsigned long long size;
+    int active;
+    uintptr_t addr;
 };
 
 /**
@@ -40,7 +42,7 @@ void* dmalloc(size_t sz, const char* file, long line) {
     if ((uintptr_t)((metadata*)ptr + 1 + sz) > m_stats.heap_max) {
         m_stats.heap_max = (uintptr_t)((metadata*)ptr + 1 + sz);
     }
-    struct metadata ptr_metadata = {(unsigned long long)sz};
+    struct metadata ptr_metadata = {(unsigned long long)sz, 1, (uintptr_t)((metadata*)ptr + 1)};
     *(metadata*)ptr = ptr_metadata;
     return (metadata*)ptr + 1;
 }
@@ -62,10 +64,27 @@ void dfree(void* ptr, const char* file, long line) {
     if (ptr == NULL) {
         return;
     }
+    if ((uintptr_t)ptr < m_stats.heap_min || (uintptr_t)ptr > m_stats.heap_max) {
+        fprintf(stderr, "MEMORY BUG: invalid free of pointer %ld, not in heap", (uintptr_t)ptr);
+        abort();
+    }
+    if ((uintptr_t)((metadata*)ptr - 1) % 16 != 0) {
+        fprintf(stderr, "MEMORY BUG: test23.cc:10: invalid free of pointer %p, not allocated", ptr);
+        abort();
+    }
+    if (((metadata*)ptr - 1)->addr != (uintptr_t)ptr) {
+        fprintf(stderr, "MEMORY BUG: test21&22.cc:10: invalid free of pointer %p, not allocated", ptr);
+        abort();
+    }
+    if (((metadata*)ptr - 1)->active == 0) {
+        fprintf(stderr, "MEMORY BUG: invalid free of pointer %p, double free", ptr);
+        abort();
+    }
     m_stats.nactive -= 1;
     m_stats.active_size -= ((metadata*)ptr - 1)->size;
+    ((metadata*)ptr - 1)->active = 0;
     base_free(ptr);
-    base_free((metadata*)ptr - 1);
+    // base_free((metadata*)ptr - 1);
 }
 
 /**
