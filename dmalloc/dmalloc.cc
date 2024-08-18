@@ -25,7 +25,7 @@ void* dmalloc(size_t sz, const char* file, long line) {
     (void)file, (void)line;  // avoid uninitialized variable warnings
     // Your code here.
     void* ptr = base_malloc(sizeof(metadata) + sz);
-    if (ptr == NULL) {
+    if (ptr == NULL || (size_t)sizeof(metadata) + sz < sz) {
         m_stats.nfail += 1;
         m_stats.fail_size += sz;
         return NULL;
@@ -84,6 +84,11 @@ void dfree(void* ptr, const char* file, long line) {
  */
 void* dcalloc(size_t nmemb, size_t sz, const char* file, long line) {
     // Your code here (to fix test014).
+    if (nmemb != 0 && sz > 0xffffffffffffffff / nmemb) {
+        m_stats.nfail += 1;
+        m_stats.fail_size += (unsigned long long)nmemb * (unsigned long long)sz;
+        return NULL;
+    }
     void* ptr = dmalloc(nmemb * sz, file, line);
     if (ptr) {
         memset(ptr, 0, nmemb * sz);
