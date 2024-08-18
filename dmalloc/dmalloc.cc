@@ -37,8 +37,8 @@ void* dmalloc(size_t sz, const char* file, long line) {
     if ((uintptr_t)((metadata*)ptr + 1) < m_stats.heap_min) {
         m_stats.heap_min = (uintptr_t)((metadata*)ptr + 1);
     }
-    if ((uintptr_t)((metadata*)ptr + 1) > m_stats.heap_max) {
-        m_stats.heap_max = (uintptr_t)((metadata*)ptr + 1);
+    if ((uintptr_t)((metadata*)ptr + 1 + sz) > m_stats.heap_max) {
+        m_stats.heap_max = (uintptr_t)((metadata*)ptr + 1 + sz);
     }
     struct metadata ptr_metadata = {(unsigned long long)sz};
     *(metadata*)ptr = ptr_metadata;
