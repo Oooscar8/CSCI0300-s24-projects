@@ -8,9 +8,10 @@ struct dmalloc_stats m_stats = {0, 0, 0, 0, 0, 0, 0xffffffffffffffff, 0};
 struct metadata {
     int active;
     unsigned long long size;
-    char secret;
     uintptr_t addr;
+    unsigned long align;
 };
+int secret = 1384139431;
 
 /**
  * dmalloc(sz,file,line)
@@ -27,7 +28,7 @@ struct metadata {
 void* dmalloc(size_t sz, const char* file, long line) {
     (void)file, (void)line;  // avoid uninitialized variable warnings
     // Your code here.
-    void* ptr = base_malloc(sizeof(metadata) + sz);
+    void* ptr = base_malloc(sizeof(metadata) + sz + 4);
     if (ptr == NULL || (size_t)sizeof(metadata) + sz < sz) {
         m_stats.nfail += 1;
         m_stats.fail_size += sz;
@@ -43,8 +44,9 @@ void* dmalloc(size_t sz, const char* file, long line) {
     if ((uintptr_t)((char*)ptr + sizeof(metadata) + sz) > m_stats.heap_max) {
         m_stats.heap_max = (uintptr_t)((char*)ptr + sizeof(metadata) + sz);
     }
-    struct metadata ptr_metadata = {1, (unsigned long long)sz, *(char*)((char*)ptr + sizeof(metadata) + sz), (uintptr_t)((metadata*)ptr + 1)};
+    struct metadata ptr_metadata = {1, (unsigned long long)sz, (uintptr_t)((metadata*)ptr + 1), 0};
     *(metadata*)ptr = ptr_metadata;
+    *(int*)((char*)ptr + sizeof(metadata) + sz) = secret;
     return (void*)((metadata*)ptr + 1);
 }
 
@@ -81,7 +83,7 @@ void dfree(void* ptr, const char* file, long line) {
         fprintf(stderr, "MEMORY BUG: invalid free of pointer %p, double free", ptr);
         abort();
     }
-    if (*(char*)((char*)ptr + ((metadata*)ptr - 1)->size) != ((metadata*)ptr - 1)->secret) {
+    if (*(int*)((char*)ptr + ((metadata*)ptr - 1)->size) != secret) {
         fprintf(stderr, "MEMORY BUG: detected wild write during free of pointer %p", ptr);
         abort();
     }
