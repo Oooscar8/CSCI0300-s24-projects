@@ -71,12 +71,8 @@ void dfree(void* ptr, const char* file, long line) {
         fprintf(stderr, "MEMORY BUG: invalid free of pointer %ld, not in heap", (uintptr_t)ptr);
         abort();
     }
-    if ((uintptr_t)ptr % 16 != 0) {
-        fprintf(stderr, "MEMORY BUG: test23.cc:10: invalid free of pointer %p, not allocated", ptr);
-        abort();
-    }
-    if (((metadata*)ptr - 1)->addr != (uintptr_t)ptr) {
-        fprintf(stderr, "MEMORY BUG: test21&22.cc:10: invalid free of pointer %p, not allocated", ptr);
+    if ((uintptr_t)ptr % 16 != 0 || ((metadata*)ptr - 1)->addr != (uintptr_t)ptr) {
+        fprintf(stderr, "MEMORY BUG: %s:%ld: invalid free of pointer %p, not allocated",file, line, ptr);
         abort();
     }
     if (((metadata*)ptr - 1)->active == 0) {
