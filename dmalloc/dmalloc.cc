@@ -33,7 +33,7 @@ void* dmalloc(size_t sz, const char* file, long line) {
     (void)file, (void)line;  // avoid uninitialized variable warnings
     // Your code here.
     void* ptr = base_malloc(sizeof(metadata) + sz + 4);
-    if (ptr == NULL || (size_t)sizeof(metadata) + sz < sz) {
+    if (ptr == NULL || (size_t)sizeof(metadata) + sz + 4 < sz) {
         m_stats.nfail += 1;
         m_stats.fail_size += sz;
         return NULL;
