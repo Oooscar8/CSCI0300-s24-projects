@@ -48,11 +48,14 @@ void* dmalloc(size_t sz, const char* file, long line) {
     if ((uintptr_t)((char*)ptr + sizeof(metadata) + sz) > m_stats.heap_max) {
         m_stats.heap_max = (uintptr_t)((char*)ptr + sizeof(metadata) + sz);
     }
-    struct metadata ptr_metadata = {1, (unsigned long long)sz, (uintptr_t)((metadata*)ptr + 1), file, line, 0};
+    struct metadata ptr_metadata = {
+        1, (unsigned long long)sz, (uintptr_t)((metadata*)ptr + 1), file, line,
+        0};
     *(metadata*)ptr = ptr_metadata;
     *(int*)((char*)ptr + sizeof(metadata) + sz) = secret;
 
-    activeMap.insert(std::make_pair(ptr_metadata.addr, (void*)((metadata*)ptr + 1)));
+    activeMap.insert(
+        std::make_pair(ptr_metadata.addr, (void*)((metadata*)ptr + 1)));
 
     return (void*)((metadata*)ptr + 1);
 }
@@ -74,33 +77,60 @@ void dfree(void* ptr, const char* file, long line) {
     if (ptr == NULL) {
         return;
     }
-    if ((uintptr_t)ptr < m_stats.heap_min || (uintptr_t)ptr > m_stats.heap_max) {
-        fprintf(stderr, "MEMORY BUG: invalid free of pointer %ld, not in heap", (uintptr_t)ptr);
+    if ((uintptr_t)ptr < m_stats.heap_min ||
+        (uintptr_t)ptr > m_stats.heap_max) {
+        fprintf(stderr, "MEMORY BUG: invalid free of pointer %ld, not in heap\n",
+                (uintptr_t)ptr);
         abort();
     }
-    if ((uintptr_t)ptr % 16 != 0 || ((metadata*)ptr - 1)->addr != (uintptr_t)ptr) {
-        fprintf(stderr, "MEMORY BUG: %s:%ld: invalid free of pointer %p, not allocated",file, line, ptr);
+    if ((uintptr_t)ptr % 16 != 0 ||
+        ((metadata*)ptr - 1)->addr != (uintptr_t)ptr) {
+        fprintf(stderr,
+                "MEMORY BUG: %s:%ld: invalid free of pointer %p, not allocated\n",
+                file, line, ptr);
+        for (auto it = activeMap.begin(); it != activeMap.end(); ++it) {
+            if (it->second < ptr &&
+                (unsigned long long)ptr < (unsigned long long)it->second + ((metadata*)it->second - 1)->size) {
+                fprintf(stderr,
+                        "%s:%ld: %p is %ld bytes inside a %lld byte region "
+                        "allocated here\n",
+                        ((metadata*)it->second - 1)->fileName,
+                        ((metadata*)it->second - 1)->line, ptr,
+                        (uintptr_t)ptr - (uintptr_t)it->second,
+                        ((metadata*)it->second - 1)->size);
+                break;
+            }
+        }
         abort();
     }
     if (((metadata*)ptr - 1)->active == 0) {
-        fprintf(stderr, "MEMORY BUG: invalid free of pointer %p, double free", ptr);
+        fprintf(stderr, "MEMORY BUG: invalid free of pointer %p, double free\n",
+                ptr);
         abort();
     }
     if (*(int*)((char*)ptr + ((metadata*)ptr - 1)->size) != secret) {
-        fprintf(stderr, "MEMORY BUG: detected wild write during free of pointer %p", ptr);
+        fprintf(stderr,
+                "MEMORY BUG: detected wild write during free of pointer %p\n",
+                ptr);
         abort();
     }
     m_stats.nactive -= 1;
     m_stats.active_size -= ((metadata*)ptr - 1)->size;
     ((metadata*)ptr - 1)->active = 0;
 
-    for (auto it = activeMap.begin(); it != activeMap.end(); ) {
+    int whether_erase = 0;
+    for (auto it = activeMap.begin(); it != activeMap.end();) {
         if (it->second == ptr) {
             it = activeMap.erase(it);
-        }
-        else {
+            whether_erase = 1;
+        } else {
             ++it;
         }
+    }
+    if (whether_erase == 0) {
+        fprintf(stderr, "MEMORY BUG: invalid free of pointer %p, %p is not an active allocation\n",
+                ptr, ptr);
+        abort();
     }
 
     base_free(ptr);
@@ -170,6 +200,10 @@ void print_statistics() {
 void print_leak_report() {
     // Your code here.
     for (auto it = activeMap.begin(); it != activeMap.end(); ++it) {
-        fprintf(stdout, "LEAK CHECK: %s:%ld: allocated object %p with size %lld\n", ((metadata*)it->second - 1)->fileName, ((metadata*)it->second - 1)->line, it->second, ((metadata*)it->second - 1)->size);
+        fprintf(stdout,
+                "LEAK CHECK: %s:%ld: allocated object %p with size %lld\n",
+                ((metadata*)it->second - 1)->fileName,
+                ((metadata*)it->second - 1)->line, it->second,
+                ((metadata*)it->second - 1)->size);
     }
 }
