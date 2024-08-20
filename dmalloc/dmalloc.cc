@@ -10,11 +10,12 @@ struct metadata {
     int active;
     unsigned long long size;
     uintptr_t addr;
+    const char* fileName;
+    long line;
     unsigned long align;
 };
 int secret = 1384139431;
 std::unordered_map<unsigned long, void*> activeMap;
-const char* fileName;
 
 /**
  * dmalloc(sz,file,line)
@@ -47,12 +48,11 @@ void* dmalloc(size_t sz, const char* file, long line) {
     if ((uintptr_t)((char*)ptr + sizeof(metadata) + sz) > m_stats.heap_max) {
         m_stats.heap_max = (uintptr_t)((char*)ptr + sizeof(metadata) + sz);
     }
-    struct metadata ptr_metadata = {1, (unsigned long long)sz, (uintptr_t)((metadata*)ptr + 1), 0};
+    struct metadata ptr_metadata = {1, (unsigned long long)sz, (uintptr_t)((metadata*)ptr + 1), file, line, 0};
     *(metadata*)ptr = ptr_metadata;
     *(int*)((char*)ptr + sizeof(metadata) + sz) = secret;
 
-    activeMap.insert(std::make_pair((unsigned long)line + ptr_metadata.addr, (void*)((metadata*)ptr + 1)));
-    fileName = file;
+    activeMap.insert(std::make_pair(ptr_metadata.addr, (void*)((metadata*)ptr + 1)));
 
     return (void*)((metadata*)ptr + 1);
 }
@@ -170,6 +170,6 @@ void print_statistics() {
 void print_leak_report() {
     // Your code here.
     for (auto it = activeMap.begin(); it != activeMap.end(); ++it) {
-        fprintf(stdout, "LEAK CHECK: %s:%ld: allocated object %p with size %lld\n", fileName, it->first - ((metadata*)it->second - 1)->addr, it->second, ((metadata*)it->second - 1)->size);
+        fprintf(stdout, "LEAK CHECK: %s:%ld: allocated object %p with size %lld\n", ((metadata*)it->second - 1)->fileName, ((metadata*)it->second - 1)->line, it->second, ((metadata*)it->second - 1)->size);
     }
 }
