@@ -37,7 +37,7 @@
    Use the dbg() function instead of printf debugging if you don't want to
    hunt down 30 printfs when you want to hand in
 */
-#define DEBUG_PRINT 0
+#define DEBUG_PRINT 1
 #define DEBUG_STATISTICS 1
 
 struct io300_file {
