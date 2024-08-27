@@ -177,21 +177,11 @@ off_t io300_filesize(struct io300_file* const f) {
 int io300_readc(struct io300_file* const f) {
     check_invariants(f);
     // TODO: Implement this
-    if (f->file_head == io300_filesize(f) - 1) {
-        if (io300_flush(f) == -1) {
-            return -1;
-        } 
-    }
     if (f->file_head == io300_filesize(f)) {
         return -1;
     }
-    if (f->file_head == 0) {
+    if (f->cache_head == 0) {
         if (io300_fetch(f) == -1) {
-            return -1;
-        }
-    }
-    if (f->file_head != 0 && f->cache_head == 0) {
-        if (io300_flush(f) == -1 || io300_fetch(f) == -1) {
             return -1;
         }
     }
@@ -209,17 +199,17 @@ int io300_readc(struct io300_file* const f) {
 int io300_writec(struct io300_file* f, int ch) {
     check_invariants(f);
     // TODO: Implement this
-    if (f->file_head == 0) {
-        if (io300_fetch(f) == -1) {
-            return -1;
-        }
-    }
     if (f->file_head != 0 && f->cache_head == 0) {
-        if (io300_flush(f) == -1 || io300_fetch(f) == -1) {
+        if (io300_flush(f) == -1) {
             return -1;
         }
     }
     *(f->cache + f->cache_head) = (char)ch;
+    if ((char)ch == '\n') {
+        if (write(f->fd, f->cache, f->cache_head + 1) == -1) {
+            return -1;
+        }
+    }
     f->file_head += 1;
     f->cache_head = (f->cache_head + 1) % CACHE_SIZE;
     return ch;
