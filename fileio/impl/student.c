@@ -212,11 +212,6 @@ int io300_writec(struct io300_file* f, int ch) {
             return -1;
         }
     }
-    if (f->file_head >= fileSize) {
-        if (write(f->fd, f->cache + f->cache_head, 1) == -1) {
-            return -1;
-        }
-    }
     f->file_head += 1;
     f->cache_head = (f->cache_head + 1) % CACHE_SIZE;
     return ch;
