@@ -41,6 +41,7 @@
 #define DEBUG_STATISTICS 1
 
 int io300_fetch(struct io300_file* const f);
+int fileSize;
 
 struct io300_file {
     /* read,write,seek all take a file descriptor as a parameter */
@@ -181,6 +182,7 @@ int io300_readc(struct io300_file* const f) {
         return -1;
     }
     if (f->cache_head == 0) {
+        fileSize = io300_filesize(f);
         if (io300_fetch(f) == -1) {
             return -1;
         }
@@ -205,8 +207,13 @@ int io300_writec(struct io300_file* f, int ch) {
         }
     }
     *(f->cache + f->cache_head) = (char)ch;
-    if ((char)ch == '\n') {
+    if (f->file_head == fileSize - 1) {
         if (write(f->fd, f->cache, f->cache_head + 1) == -1) {
+            return -1;
+        }
+    }
+    if (f->file_head >= fileSize) {
+        if (write(f->fd, f->cache + f->cache_head, 1) == -1) {
             return -1;
         }
     }
