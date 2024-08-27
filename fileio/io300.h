@@ -38,7 +38,7 @@ off_t io300_filesize(struct io300_file* f);
     as measured in bytes from the beginning  of the file.  On error, the
     value (off_t)-1 is returned.
 */
-int io300_seek(struct io300_file* f, off_t pos);
+int io300_seek(struct io300_file* f, off_t pos); 
 
 /*
     readc() reads a single byte from the file and returns it.
