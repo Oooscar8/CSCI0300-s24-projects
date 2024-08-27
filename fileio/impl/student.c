@@ -53,7 +53,6 @@ struct io300_file {
     int file_head;
     /* the head of the cache */
     int cache_head;
-    int cache_volume;
 
     /* Used for debugging, keep track of which io300_file is which */
     char* description;
@@ -179,23 +178,20 @@ int io300_readc(struct io300_file* const f) {
     check_invariants(f);
     // TODO: Implement this
     if (f->file_head == io300_filesize(f) - 1) {
-        io300_flush(f);
+        if (io300_flush(f) == -1) {
+            return -1;
+        } 
     }
     if (f->file_head == io300_filesize(f)) {
         return -1;
     }
     if (f->file_head == 0) {
-        f->cache_volume = io300_fetch(f);
-        if (f->cache_volume == -1) {
+        if (io300_fetch(f) == -1) {
             return -1;
         }
     }
     if (f->file_head != 0 && f->cache_head == 0) {
-        if (io300_flush(f) == -1) {
-            return -1;
-        }
-        f->cache_volume = io300_fetch(f);
-        if (f->cache_volume == -1) {
+        if (io300_flush(f) == -1 || io300_fetch(f) == -1) {
             return -1;
         }
     }
@@ -214,17 +210,12 @@ int io300_writec(struct io300_file* f, int ch) {
     check_invariants(f);
     // TODO: Implement this
     if (f->file_head == 0) {
-        f->cache_volume = io300_fetch(f);
-        if (f->cache_volume == -1) {
+        if (io300_fetch(f) == -1) {
             return -1;
         }
     }
     if (f->file_head != 0 && f->cache_head == 0) {
-        if (io300_flush(f) == -1) {
-            return -1;
-        }
-        f->cache_volume = io300_fetch(f);
-        if (f->cache_volume == -1) {
+        if (io300_flush(f) == -1 || io300_fetch(f) == -1) {
             return -1;
         }
     }
@@ -251,7 +242,7 @@ ssize_t io300_write(struct io300_file* const f, const char* buff,
 int io300_flush(struct io300_file* const f) {
     check_invariants(f);
     // TODO: Implement this
-    return write(f->fd, f->cache, f->cache_volume);
+    return write(f->fd, f->cache, CACHE_SIZE);
     /** return 0; */
 }
 
