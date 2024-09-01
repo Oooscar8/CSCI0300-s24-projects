@@ -54,6 +54,7 @@ struct io300_file {
     int file_head;
     /* the head of the cache */
     int cache_head;
+    int fileInCache;
 
     /* Used for debugging, keep track of which io300_file is which */
     char* description;
@@ -132,6 +133,10 @@ struct io300_file* io300_open(const char* const path, char* description) {
     // TODO: Initialize your file
     ret->file_head = 0;
     ret->cache_head = 0;
+    ret->fileInCache = 0;
+    if (io300_filesize(ret)) {
+        fileSize = io300_filesize(ret);
+    }
     struct io300_statistics init_stats = {0, 0, 0};
     ret->stats = init_stats;
 
@@ -145,7 +150,6 @@ int io300_seek(struct io300_file* const f, off_t const pos) {
     f->stats.seeks++;
 
     // TODO: Implement this
-    f->file_head = pos;
     return lseek(f->fd, pos, SEEK_SET);
 }
 
@@ -178,12 +182,27 @@ off_t io300_filesize(struct io300_file* const f) {
 int io300_readc(struct io300_file* const f) {
     check_invariants(f);
     // TODO: Implement this
-    if (f->file_head >= io300_filesize(f)) {
+    if (f->file_head >= fileSize) {
         return -1;
     }
-    if (f->cache_head == 0) {
-        fileSize = io300_filesize(f);
+    if (f->file_head == 0) {
         if (io300_fetch(f) == -1) {
+            return -1;
+        }
+    }
+    if (f->file_head == fileSize - 1) {
+        if (io300_flush(f) == -1) {
+            return -1;
+        }
+    }
+    if (f->fileInCache < f->file_head) {
+        if (io300_fetch(f) == -1) {
+            return -1;
+        }
+    }
+    if (f->file_head != 0 && f->cache_head == 0) {
+        io300_seek(f, f->file_head - CACHE_SIZE);
+        if (io300_flush(f) == -1 && io300_fetch(f) == -1) {
             return -1;
         }
     }
@@ -201,14 +220,17 @@ int io300_readc(struct io300_file* const f) {
 int io300_writec(struct io300_file* f, int ch) {
     check_invariants(f);
     // TODO: Implement this
-    if (f->file_head != 0 && f->cache_head == 0) {
+    if (f->file_head >= fileSize) {
+        return -1;
+    }
+    *(f->cache + f->cache_head) = (char)ch;
+    if (f->file_head == fileSize - 1) {
         if (io300_flush(f) == -1) {
             return -1;
         }
     }
-    *(f->cache + f->cache_head) = (char)ch;
-    if (f->file_head == fileSize - 1) {
-        if (write(f->fd, f->cache, f->cache_head + 1) == -1) {
+    if (f->file_head != 0 && f->cache_head == 0) {
+        if (io300_flush(f) == -1) {
             return -1;
         }
     }
@@ -234,7 +256,11 @@ ssize_t io300_write(struct io300_file* const f, const char* buff,
 int io300_flush(struct io300_file* const f) {
     check_invariants(f);
     // TODO: Implement this
-    return write(f->fd, f->cache, CACHE_SIZE);
+    if (f->cache_head == 0) {
+        return write(f->fd, f->cache, CACHE_SIZE);
+    }
+    return write(f->fd, f->cache, f->cache_head + 1);
+
     /** return 0; */
 }
 
@@ -244,6 +270,7 @@ int io300_fetch(struct io300_file* const f) {
     /* This helper should contain the logic for fetching data from the file into the cache. */
     /* Think about how you can use this helper to refactor out some of the logic in your read, write, and seek functions! */
     /* Feel free to add arguments if needed. */
-    return read(f->fd, f->cache, CACHE_SIZE);
+    f->fileInCache += CACHE_SIZE - f->cache_head;
+    return read(f->fd, f->cache + f->cache_head, CACHE_SIZE - f->cache_head);
     /** return 0; */
 }
