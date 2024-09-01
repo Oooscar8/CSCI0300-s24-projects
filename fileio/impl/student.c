@@ -178,7 +178,7 @@ off_t io300_filesize(struct io300_file* const f) {
 int io300_readc(struct io300_file* const f) {
     check_invariants(f);
     // TODO: Implement this
-    if (f->file_head == io300_filesize(f)) {
+    if (f->file_head >= io300_filesize(f)) {
         return -1;
     }
     if (f->cache_head == 0) {
