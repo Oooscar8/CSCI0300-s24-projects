@@ -168,21 +168,24 @@ void process_setup(pid_t pid, const char *program_name)
 
     // Initialize this process's page table. Notice how we are currently
     // sharing the kernel's page table.
-    ptable[pid].pagetable = (x86_64_pagetable*)kalloc(PAGESIZE);
+    ptable[pid].pagetable = kernel_pagetable;
     memset(ptable[pid].pagetable, 0, PAGESIZE);
-    
-    for (vmiter it(kernel_pagetable); it.va() < PROC_START_ADDR; it += PAGESIZE) {
-        if (it.va() == 0) {
-            vmiter(ptable[pid].pagetable, it.va()).map(it.va(), 0);
+
+    for (vmiter it(kernel_pagetable), this_v(ptable[pid].pagetable); it.va() < PROC_START_ADDR; it += PAGESIZE, this_v += PAGESIZE)
+    {
+        if (it.va() == 0)
+        {
+            this_v.map(it.va(), 0);
             continue;
         }
-        if (it.va() == CONSOLE_ADDR) {
-            vmiter(ptable[pid].pagetable, it.va()).map(it.pa(), PTE_P | PTE_W | PTE_U);
-            log_printf("VA %p maps to PA %p with PERMS %p, %p, %p\n", it.va(), it.pa(), PTE_P, PTE_W, PTE_U);
+        if (it.va() == CONSOLE_ADDR)
+        {
+            this_v.map(it.pa(), PTE_P | PTE_W | PTE_U);
+            log_printf("VA %p maps to PA %p with PERMS %p, %p, %p\n", this_v.va(), this_v.pa(), PTE_P, PTE_W, PTE_U);
             continue;
         }
-        vmiter(ptable[pid].pagetable, it.va()).map(it.pa(), PTE_P);
-        log_printf("VA %p maps to PA %p with PERMS %p\n", it.va(), it.pa(), PTE_P);
+        this_v.map(it.pa(), PTE_P);
+        log_printf("VA %p maps to PA %p with PERMS %p\n", this_v.va(), this_v.pa(), PTE_P);
     }
 
     // Initialize `program_loader`.
@@ -195,9 +198,7 @@ void process_setup(pid_t pid, const char *program_name)
     // First, for each segment of the program, we allocate page(s) of memory.
     for (loader.reset(); loader.present(); ++loader)
     {
-        for (uintptr_t a = round_down(loader.va(), PAGESIZE);
-             a < loader.va() + loader.size();
-             a += PAGESIZE)
+        for (uintptr_t a = round_down(loader.va(), PAGESIZE); a < loader.va() + loader.size(); a += PAGESIZE)
         {
             // `a` is the virtual address of the current segment's page.
             assert(!pages[a / PAGESIZE].used());
@@ -205,10 +206,12 @@ void process_setup(pid_t pid, const char *program_name)
             // Here, we're directly getting the page that has the same physical address as the
             // virtual address `a`, and claiming that page by incrementing its reference count
             // (you will have to change this later).
-            if (loader.writable()) {
-                vmiter(ptable[pid].pagetable, a).map(a, PTE_P | PTE_W | PTE_U);  
+            if (loader.writable())
+            {
+                vmiter(ptable[pid].pagetable, a).map(a, PTE_P | PTE_W | PTE_U);
             }
-            else {
+            else
+            {
                 vmiter(ptable[pid].pagetable, a).map(a, PTE_P | PTE_U);
             }
             pages[a / PAGESIZE].refcount = 1;
@@ -231,7 +234,7 @@ void process_setup(pid_t pid, const char *program_name)
     // Again, we're using the physical page that has the same address as the `stack_addr` to
     // maintain the one-to-one mapping between physical and virtual memory (you will have to change
     // this later).
-    vmiter(ptable[pid].pagetable, stack_addr).map(stack_addr, PTE_P | PTE_W | PTE_U); 
+    vmiter(ptable[pid].pagetable, stack_addr).map(stack_addr, PTE_P | PTE_W | PTE_U);
     pages[stack_addr / PAGESIZE].refcount = 1;
     // Set %rsp to the start of the stack.
     ptable[pid].regs.reg_rsp = stack_addr + PAGESIZE;
