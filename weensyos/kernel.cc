@@ -170,16 +170,19 @@ void process_setup(pid_t pid, const char *program_name)
     // sharing the kernel's page table.
     ptable[pid].pagetable = (x86_64_pagetable*)kalloc(PAGESIZE);
     memset(ptable[pid].pagetable, 0, PAGESIZE);
-
-    vmiter this_v(ptable[pid].pagetable);
+    
     for (vmiter it(kernel_pagetable); it.va() < PROC_START_ADDR; it += PAGESIZE) {
-        if (it.va() == CONSOLE_ADDR) {
-            this_v.map(it.pa(), PTE_P | PTE_W | PTE_U);
-            this_v += PAGESIZE;
+        if (it.va() == 0) {
+            vmiter(ptable[pid].pagetable, it.va()).map(it.va(), 0);
             continue;
         }
-        this_v.map(it.pa(), PTE_P);
-        this_v += PAGESIZE;
+        if (it.va() == CONSOLE_ADDR) {
+            vmiter(ptable[pid].pagetable, it.va()).map(it.pa(), PTE_P | PTE_W | PTE_U);
+            log_printf("VA %p maps to PA %p with PERMS %p, %p, %p\n", it.va(), it.pa(), PTE_P, PTE_W, PTE_U);
+            continue;
+        }
+        vmiter(ptable[pid].pagetable, it.va()).map(it.pa(), PTE_P);
+        log_printf("VA %p maps to PA %p with PERMS %p\n", it.va(), it.pa(), PTE_P);
     }
 
     // Initialize `program_loader`.
@@ -228,6 +231,7 @@ void process_setup(pid_t pid, const char *program_name)
     // Again, we're using the physical page that has the same address as the `stack_addr` to
     // maintain the one-to-one mapping between physical and virtual memory (you will have to change
     // this later).
+    vmiter(ptable[pid].pagetable, stack_addr).map(stack_addr, PTE_P | PTE_W | PTE_U); 
     pages[stack_addr / PAGESIZE].refcount = 1;
     // Set %rsp to the start of the stack.
     ptable[pid].regs.reg_rsp = stack_addr + PAGESIZE;
