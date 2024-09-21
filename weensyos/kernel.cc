@@ -209,6 +209,14 @@ void process_setup(pid_t pid, const char *program_name)
             // Here, we're directly getting the page that has the same physical address as the
             // virtual address `a`, and claiming that page by incrementing its reference count
             // (you will have to change this later).
+            if (loader.writable())
+            {
+                vmiter(ptable[pid].pagetable, a).map(a, PTE_P | PTE_W | PTE_U);
+            }
+            else
+            {
+                vmiter(ptable[pid].pagetable, a).map(a, PTE_P | PTE_U);
+            }
             pages[a / PAGESIZE].refcount = 1;
         }
     }
@@ -229,6 +237,7 @@ void process_setup(pid_t pid, const char *program_name)
     // Again, we're using the physical page that has the same address as the `stack_addr` to
     // maintain the one-to-one mapping between physical and virtual memory (you will have to change
     // this later).
+    vmiter(ptable[pid].pagetable, stack_addr).map(stack_addr, PTE_P | PTE_W | PTE_U);
     pages[stack_addr / PAGESIZE].refcount = 1;
     // Set %rsp to the start of the stack.
     ptable[pid].regs.reg_rsp = stack_addr + PAGESIZE;
