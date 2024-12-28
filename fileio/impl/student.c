@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -37,7 +38,7 @@
    Use the dbg() function instead of printf debugging if you don't want to
    hunt down 30 printfs when you want to hand in
 */
-#define DEBUG_PRINT 0
+#define DEBUG_PRINT 1
 #define DEBUG_STATISTICS 1
 
 struct io300_file {
@@ -47,6 +48,12 @@ struct io300_file {
     char* cache;
 
     // TODO: Your properties go here
+    int cache_start;  // File offset where cache starts
+    int valid_bytes;  // Number of valid bytes in cache
+    int current_pos;  // Current file position
+    //bool cache_valid;     // True if cache contains valid data for current position range([cache_start, cache_start + valid_bytes))
+    bool
+        cache_dirty;  // True if cache has been modified and needs writing to disk.
 
     /* Used for debugging, keep track of which io300_file is which */
     char* description;
@@ -57,6 +64,8 @@ struct io300_file {
         int seeks;
     } stats;
 };
+
+int io300_fetch(struct io300_file* const f);
 
 /*
     Assert the properties that you would like your file to have at all times.
@@ -123,6 +132,17 @@ struct io300_file* io300_open(const char* const path, char* description) {
     }
     ret->description = description;
     // TODO: Initialize your file
+    // Initialize metadata
+    ret->current_pos = 0;  // Start at beginning of file
+    ret->cache_start = 0;  // Cache starts at file beginning
+    ret->valid_bytes = 0;  // No valid data in cache yet
+    //ret->cache_valid = false;    // Cache starts invalid
+    ret->cache_dirty = false;  // Cache starts clean
+
+    // Initialize statistics
+    ret->stats.read_calls = 0;
+    ret->stats.write_calls = 0;
+    ret->stats.seeks = 0;
 
     check_invariants(ret);
     dbg(ret, "Just finished initializing file from path: %s\n", path);
@@ -140,12 +160,18 @@ int io300_seek(struct io300_file* const f, off_t const pos) {
 int io300_close(struct io300_file* const f) {
     check_invariants(f);
 
+    // Flush any remaining dirty data
+    if (f->cache_dirty) {
+        if (io300_flush(f) == -1) return -1;
+    }
+
 #if (DEBUG_STATISTICS == 1)
     printf("stats: {desc: %s, read_calls: %d, write_calls: %d, seeks: %d}\n",
            f->description, f->stats.read_calls, f->stats.write_calls,
            f->stats.seeks);
 #endif
     // TODO: Implement this
+
     close(f->fd);
     free(f->cache);
     free(f);
@@ -166,18 +192,47 @@ off_t io300_filesize(struct io300_file* const f) {
 int io300_readc(struct io300_file* const f) {
     check_invariants(f);
     // TODO: Implement this
-    unsigned char c;
-    if (read(f->fd, &c, 1) == 1) {
-        return c;
-    } else {
-        return -1;
+
+    // Check if current position is in cache range
+    if (f->current_pos < f->cache_start ||
+        f->current_pos >= f->cache_start + f->valid_bytes) {
+        if (io300_fetch(f) == -1) return -1;
     }
+
+    return (unsigned char)f->cache[f->current_pos++ - f->cache_start];
+
+    // unsigned char c;
+    // if (read(f->fd, &c, 1) == 1) {
+    //     return c;
+    // } else {
+    //     return -1;
+    // }
 }
+
 int io300_writec(struct io300_file* f, int ch) {
     check_invariants(f);
     // TODO: Implement this
-    char const c = (char)ch;
-    return write(f->fd, &c, 1) == 1 ? ch : -1;
+
+    if (f->current_pos < f->cache_start ||
+        f->current_pos >= f->cache_start + CACHE_SIZE) {
+        if (f->cache_dirty) {
+            if (io300_flush(f) == -1) return -1;
+        }
+        f->cache_start = f->current_pos;
+        f->valid_bytes = 0;
+    }
+
+    f->cache[f->current_pos - f->cache_start] = ch;
+    f->cache_dirty = true;
+    f->current_pos++;
+    if (f->current_pos - f->cache_start > f->valid_bytes) {
+        f->valid_bytes = f->current_pos - f->cache_start;
+    }
+
+    return ch;
+
+    // char const c = (char)ch;
+    // return write(f->fd, &c, 1) == 1 ? ch : -1;
 }
 
 ssize_t io300_read(struct io300_file* const f, char* const buff,
@@ -196,6 +251,15 @@ ssize_t io300_write(struct io300_file* const f, const char* buff,
 int io300_flush(struct io300_file* const f) {
     check_invariants(f);
     // TODO: Implement this
+
+    if (!f->cache_dirty) return 0;
+
+    // Seek to cache start and write valid bytes
+    lseek(f->fd, f->cache_start, SEEK_SET);
+    f->stats.seeks++;
+    if (write(f->fd, f->cache, f->valid_bytes) == -1) return -1;
+    f->stats.write_calls++;
+    f->cache_dirty = false;
     return 0;
 }
 
@@ -205,5 +269,18 @@ int io300_fetch(struct io300_file* const f) {
     /* This helper should contain the logic for fetching data from the file into the cache. */
     /* Think about how you can use this helper to refactor out some of the logic in your read, write, and seek functions! */
     /* Feel free to add arguments if needed. */
+
+    // Flush if needed
+    if (f->cache_dirty && io300_flush(f) == -1) return -1;
+
+    // Read new block at current position
+    lseek(f->fd, f->current_pos, SEEK_SET);
+    f->stats.seeks++;
+    f->cache_start = f->current_pos;
+    ssize_t bytes = read(f->fd, f->cache, CACHE_SIZE);
+    if (bytes == -1) return -1;
+    f->stats.read_calls++;
+    f->valid_bytes = bytes;
+
     return 0;
 }
