@@ -193,6 +193,8 @@ int io300_readc(struct io300_file* const f) {
     check_invariants(f);
     // TODO: Implement this
 
+    if (f->current_pos >= io300_filesize(f)) return -1;
+
     // Check if current position is in cache range
     if (f->current_pos < f->cache_start ||
         f->current_pos >= f->cache_start + f->valid_bytes) {
@@ -200,13 +202,6 @@ int io300_readc(struct io300_file* const f) {
     }
 
     return (unsigned char)f->cache[f->current_pos++ - f->cache_start];
-
-    // unsigned char c;
-    // if (read(f->fd, &c, 1) == 1) {
-    //     return c;
-    // } else {
-    //     return -1;
-    // }
 }
 
 int io300_writec(struct io300_file* f, int ch) {
@@ -230,9 +225,6 @@ int io300_writec(struct io300_file* f, int ch) {
     }
 
     return ch;
-
-    // char const c = (char)ch;
-    // return write(f->fd, &c, 1) == 1 ? ch : -1;
 }
 
 ssize_t io300_read(struct io300_file* const f, char* const buff,
@@ -278,8 +270,8 @@ int io300_fetch(struct io300_file* const f) {
     f->stats.seeks++;
     f->cache_start = f->current_pos;
     ssize_t bytes = read(f->fd, f->cache, CACHE_SIZE);
-    if (bytes == -1) return -1;
     f->stats.read_calls++;
+    if (bytes <= 0) return -1;  // EOF
     f->valid_bytes = bytes;
 
     return 0;
