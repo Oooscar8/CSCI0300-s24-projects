@@ -48,12 +48,11 @@ struct io300_file {
     char* cache;
 
     // TODO: Your properties go here
-    int cache_start;  // File offset where cache starts
-    int valid_bytes;  // Number of valid bytes in cache
-    int current_pos;  // Current file position
+    off_t cache_start;  // File offset where cache starts
+    off_t current_pos;  // Current file position
+    bool cache_dirty;  // True if cache has been modified and needs writing to disk.
+    //int valid_bytes;  // Number of valid bytes in cache
     //bool cache_valid;     // True if cache contains valid data for current position range([cache_start, cache_start + valid_bytes))
-    bool
-        cache_dirty;  // True if cache has been modified and needs writing to disk.
 
     /* Used for debugging, keep track of which io300_file is which */
     char* description;
@@ -134,10 +133,10 @@ struct io300_file* io300_open(const char* const path, char* description) {
     // TODO: Initialize your file
     // Initialize metadata
     ret->current_pos = 0;  // Start at beginning of file
-    ret->cache_start = 0;  // Cache starts at file beginning
-    ret->valid_bytes = 0;  // No valid data in cache yet
-    //ret->cache_valid = false;    // Cache starts invalid
+    ret->cache_start = -1;  // Cache starts at -1 to trigger fetch on first read/write
     ret->cache_dirty = false;  // Cache starts clean
+    //ret->valid_bytes = 0;  // No valid data in cache yet
+    //ret->cache_valid = false;    // Cache starts invalid
 
     // Initialize statistics
     ret->stats.read_calls = 0;
@@ -196,8 +195,8 @@ int io300_readc(struct io300_file* const f) {
     if (f->current_pos >= io300_filesize(f)) return -1;
 
     // Check if current position is in cache range
-    if (f->current_pos < f->cache_start ||
-        f->current_pos >= f->cache_start + f->valid_bytes) {
+    if (f->cache_start == -1 || f->current_pos < f->cache_start ||
+        f->current_pos >= f->cache_start + CACHE_SIZE) {
         if (io300_fetch(f) == -1) return -1;
     }
 
@@ -208,21 +207,17 @@ int io300_writec(struct io300_file* f, int ch) {
     check_invariants(f);
     // TODO: Implement this
 
-    if (f->current_pos < f->cache_start ||
+    if (f->cache_start == -1 || f->current_pos < f->cache_start ||
         f->current_pos >= f->cache_start + CACHE_SIZE) {
         if (f->cache_dirty) {
             if (io300_flush(f) == -1) return -1;
         }
         f->cache_start = f->current_pos;
-        f->valid_bytes = 0;
     }
 
     f->cache[f->current_pos - f->cache_start] = ch;
     f->cache_dirty = true;
     f->current_pos++;
-    if (f->current_pos - f->cache_start > f->valid_bytes) {
-        f->valid_bytes = f->current_pos - f->cache_start;
-    }
 
     return ch;
 }
@@ -249,7 +244,15 @@ int io300_flush(struct io300_file* const f) {
     // Seek to cache start and write valid bytes
     lseek(f->fd, f->cache_start, SEEK_SET);
     f->stats.seeks++;
-    if (write(f->fd, f->cache, f->valid_bytes) == -1) return -1;
+
+    // Calculate bytes to flush: min(CACHE_SIZE, remaining bytes)
+    size_t bytes_to_flush = CACHE_SIZE;
+    off_t file_size = io300_filesize(f);
+    if (f->cache_start + CACHE_SIZE > file_size) {
+        bytes_to_flush = file_size - f->cache_start;
+    }
+
+    if (write(f->fd, f->cache, bytes_to_flush) == -1) return -1;
     f->stats.write_calls++;
     f->cache_dirty = false;
     return 0;
@@ -269,10 +272,8 @@ int io300_fetch(struct io300_file* const f) {
     lseek(f->fd, f->current_pos, SEEK_SET);
     f->stats.seeks++;
     f->cache_start = f->current_pos;
-    ssize_t bytes = read(f->fd, f->cache, CACHE_SIZE);
+    if (read(f->fd, f->cache, CACHE_SIZE) <= 0) return -1;
     f->stats.read_calls++;
-    if (bytes <= 0) return -1;  // EOF
-    f->valid_bytes = bytes;
 
     return 0;
 }
