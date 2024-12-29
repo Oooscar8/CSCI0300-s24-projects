@@ -151,10 +151,36 @@ struct io300_file* io300_open(const char* const path, char* description) {
 
 int io300_seek(struct io300_file* const f, off_t const pos) {
     check_invariants(f);
-    f->stats.seeks++;
+    //f->stats.seeks++;
 
     // TODO: Implement this
-    return lseek(f->fd, pos, SEEK_SET);
+
+    // Validate seek position
+    if (pos < 0) return -1;
+
+    // // If seeking within current valid cache range, just update position
+    if (pos >= f->cache_start && pos < f->cache_start + (off_t)f->valid_bytes) {
+        f->current_pos = pos;
+        return pos;
+    }
+    
+    // If we have modified data in cache, flush it before moving
+    if (f->cache_dirty) {
+        if (io300_flush(f) == -1) return -1;
+    }
+    
+    // Update our position tracking
+    f->current_pos = pos;
+    
+    // Invalidate cache by setting cache_start to -1 that will 
+    // trigger a fetch on next read/write
+    f->cache_start = -1;
+    f->valid_bytes = 0;
+    
+    // Return new position
+    return pos;
+
+    //return lseek(f->fd, pos, SEEK_SET);
 }
 
 int io300_close(struct io300_file* const f) {
@@ -196,8 +222,7 @@ int io300_readc(struct io300_file* const f) {
     if (f->current_pos >= io300_filesize(f)) return -1;
 
     // Check if current position is in cache range
-    if (f->current_pos < f->cache_start ||
-        f->current_pos >= f->cache_start + (off_t)f->valid_bytes) {
+    if (f->current_pos >= f->cache_start + (off_t)f->valid_bytes) {
         if (io300_fetch(f) == -1) return -1;
     }
 
@@ -208,7 +233,7 @@ int io300_writec(struct io300_file* f, int ch) {
     check_invariants(f);
     // TODO: Implement this
 
-    if (f->current_pos < f->cache_start ||
+    if (f->cache_start == -1 ||
         f->current_pos >= f->cache_start + CACHE_SIZE) {
         if (f->cache_dirty) {
             if (io300_flush(f) == -1) return -1;
