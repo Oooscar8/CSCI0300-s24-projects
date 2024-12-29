@@ -48,9 +48,9 @@ struct io300_file {
     char* cache;
 
     // TODO: Your properties go here
-    off_t cache_start;  // File offset where cache starts
+    off_t cache_start;   // File offset where cache starts
     size_t valid_bytes;  // Number of valid bytes in cache
-    off_t current_pos;  // Current file position
+    off_t current_pos;   // Current file position
     //bool cache_valid;     // True if cache contains valid data for current position range([cache_start, cache_start + valid_bytes))
     bool
         cache_dirty;  // True if cache has been modified and needs writing to disk.
@@ -158,25 +158,28 @@ int io300_seek(struct io300_file* const f, off_t const pos) {
     // Validate seek position
     if (pos < 0) return -1;
 
-    // // If seeking within current valid cache range, just update position
+    // If seeking within current valid cache range, just update position
     if (pos >= f->cache_start && pos < f->cache_start + (off_t)f->valid_bytes) {
         f->current_pos = pos;
         return pos;
     }
-    
+
     // If we have modified data in cache, flush it before moving
     if (f->cache_dirty) {
         if (io300_flush(f) == -1) return -1;
     }
-    
+
     // Update our position tracking
     f->current_pos = pos;
-    
-    // Invalidate cache by setting cache_start to -1 that will 
-    // trigger a fetch on next read/write
-    f->cache_start = -1;
+
+    /* 
+     * Invalidate cache that will trigger a fetch on next read
+     * On next write, we can just start writing at the start of the cache
+     * since we have already invalidated the cache and flushed any dirty data
+     */
+    f->cache_start = f->current_pos;
     f->valid_bytes = 0;
-    
+
     // Return new position
     return pos;
 
@@ -233,8 +236,7 @@ int io300_writec(struct io300_file* f, int ch) {
     check_invariants(f);
     // TODO: Implement this
 
-    if (f->cache_start == -1 ||
-        f->current_pos >= f->cache_start + CACHE_SIZE) {
+    if (f->current_pos >= f->cache_start + CACHE_SIZE) {
         if (f->cache_dirty) {
             if (io300_flush(f) == -1) return -1;
         }
@@ -248,7 +250,7 @@ int io300_writec(struct io300_file* f, int ch) {
     if ((off_t)f->valid_bytes < f->current_pos - f->cache_start) {
         f->valid_bytes = f->current_pos - f->cache_start;
     }
-    
+
     return ch;
 }
 
