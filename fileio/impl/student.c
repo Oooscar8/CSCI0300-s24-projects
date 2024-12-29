@@ -220,7 +220,9 @@ int io300_writec(struct io300_file* f, int ch) {
     f->cache[f->current_pos - f->cache_start] = ch;
     f->cache_dirty = true;
     f->current_pos++;
-    f->valid_bytes = f->current_pos - f->cache_start;
+    if ((off_t)f->valid_bytes < f->current_pos - f->cache_start) {
+        f->valid_bytes = f->current_pos - f->cache_start;
+    }
     
     return ch;
 }
@@ -269,7 +271,7 @@ int io300_fetch(struct io300_file* const f) {
     f->cache_start = f->current_pos;
     ssize_t bytes = read(f->fd, f->cache, CACHE_SIZE);
     f->stats.read_calls++;
-    if (bytes <= 0) return -1;  // EOF
+    if (bytes <= 0) return -1;  // EOF or error
     f->valid_bytes = bytes;
 
     return 0;
