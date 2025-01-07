@@ -171,6 +171,8 @@ int io300_seek(struct io300_file* const f, off_t const pos) {
 
     // Update our position tracking
     f->current_pos = pos;
+    lseek(f->fd, pos, SEEK_SET);
+    f->stats.seeks++;
 
     /* 
      * Invalidate cache that will trigger a fetch on next read
@@ -274,8 +276,8 @@ int io300_flush(struct io300_file* const f) {
     if (!f->cache_dirty) return 0;
 
     // Seek to cache start and write valid bytes
-    lseek(f->fd, f->cache_start, SEEK_SET);
-    f->stats.seeks++;
+    // lseek(f->fd, f->cache_start, SEEK_SET);
+    // f->stats.seeks++;
     if (write(f->fd, f->cache, f->valid_bytes) == -1) return -1;
     f->stats.write_calls++;
     f->cache_dirty = false;
@@ -293,8 +295,8 @@ int io300_fetch(struct io300_file* const f) {
     if (f->cache_dirty && io300_flush(f) == -1) return -1;
 
     // Read new block at current position
-    lseek(f->fd, f->current_pos, SEEK_SET);
-    f->stats.seeks++;
+    // lseek(f->fd, f->current_pos, SEEK_SET);
+    // f->stats.seeks++;
     f->cache_start = f->current_pos;
     ssize_t bytes = read(f->fd, f->cache, CACHE_SIZE);
     f->stats.read_calls++;
