@@ -65,7 +65,7 @@ struct io300_file {
     } stats;
 };
 
-int io300_fetch(struct io300_file* const f);
+int io300_fetch(struct io300_file* const f, bool is_read);
 
 /*
     Assert the properties that you would like your file to have at all times.
@@ -228,7 +228,7 @@ int io300_readc(struct io300_file* const f) {
 
     // Check if current position is in cache range
     if (f->current_pos >= f->cache_start + (off_t)f->valid_bytes) {
-        if (io300_fetch(f) == -1) return -1;
+        if (io300_fetch(f, true) == -1) return -1;
     }
 
     return (unsigned char)f->cache[f->current_pos++ - f->cache_start];
@@ -239,11 +239,7 @@ int io300_writec(struct io300_file* f, int ch) {
     // TODO: Implement this
 
     if (f->current_pos >= f->cache_start + CACHE_SIZE) {
-        if (f->cache_dirty) {
-            if (io300_flush(f) == -1) return -1;
-        }
-        f->cache_start = f->current_pos;
-        f->valid_bytes = 0;
+        if (io300_fetch(f, false) == -1) return -1;
     }
 
     f->cache[f->current_pos - f->cache_start] = ch;
@@ -273,7 +269,7 @@ int io300_flush(struct io300_file* const f) {
     check_invariants(f);
     // TODO: Implement this
 
-    if (!f->cache_dirty) return 0;
+    // assert(f->cache_dirty);
 
     // Seek to cache start and write valid bytes
     // lseek(f->fd, f->cache_start, SEEK_SET);
@@ -284,7 +280,7 @@ int io300_flush(struct io300_file* const f) {
     return 0;
 }
 
-int io300_fetch(struct io300_file* const f) {
+int io300_fetch(struct io300_file* const f, bool is_read) {
     check_invariants(f);
     // TODO: Implement this
     /* This helper should contain the logic for fetching data from the file into the cache. */
@@ -292,15 +288,32 @@ int io300_fetch(struct io300_file* const f) {
     /* Feel free to add arguments if needed. */
 
     // Flush if needed
-    if (f->cache_dirty && io300_flush(f) == -1) return -1;
+    if (f->cache_dirty) {
+        if (io300_flush(f) == -1) {
+            return -1;
+        }
+    } else {
+        lseek(f->fd, f->current_pos, SEEK_SET);
+        f->stats.seeks++;
+    }
 
     // Read new block at current position
     // lseek(f->fd, f->current_pos, SEEK_SET);
     // f->stats.seeks++;
+
     f->cache_start = f->current_pos;
+
+    if (f->current_pos >= io300_filesize(f)) {
+        f->valid_bytes = 0;
+        return (is_read) ? -1 : 0;  // EOF only matters for read 
+    }
+
     ssize_t bytes = read(f->fd, f->cache, CACHE_SIZE);
     f->stats.read_calls++;
-    if (bytes <= 0) return -1;  // EOF or error
+
+    if (bytes < 0) return -1;              // Error
+    if (bytes == 0 && is_read) return -1;  // EOF only matters for read
+
     f->valid_bytes = bytes;
 
     return 0;
