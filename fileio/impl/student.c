@@ -261,36 +261,37 @@ ssize_t io300_read(struct io300_file* const f, char* const buff,
     check_invariants(f);
     // TODO: Implement this
 
+    if (f->current_pos >= io300_filesize(f)) return 0;
+
+    /*
+     * If the size of the data to be read is greater than the cache size, 
+     * we can directly read it to the user buffer and skip the cache.
+     */
+    if (sz >= CACHE_SIZE) {
+        if (f->cache_dirty && io300_flush(f) == -1) {
+            return -1;
+        }
+
+        lseek(f->fd, f->current_pos, SEEK_SET);
+        f->stats.seeks++;
+        ssize_t bytes = read(f->fd, buff, sz);
+        f->stats.read_calls++;
+
+        f->current_pos += bytes;
+        f->cache_start = f->current_pos;
+        f->valid_bytes = 0;
+
+        return bytes;
+    }
+
     ssize_t total_read = 0;
 
     while (total_read < (ssize_t)sz) {
         // Calculate offset in cache for current position
         off_t pos_in_cache = f->current_pos - f->cache_start;
 
-        // If current position is outside cache, fetch first
+        // If current position is outside cache, fetch data from disk and fill cache first
         if (pos_in_cache >= (off_t)f->valid_bytes) {
-            /*
-             * If the size of the data to be read is greater than the cache size, 
-             * we can directly read it to the user buffer and skip the cache.
-             */
-            if (sz >= CACHE_SIZE) {
-                if (f->cache_dirty && io300_flush(f) == -1) {
-                    return -1;
-                }
-
-                lseek(f->fd, f->current_pos, SEEK_SET);
-                f->stats.seeks++;
-                ssize_t bytes = read(f->fd, buff, sz);
-                f->stats.read_calls++;
-
-                f->current_pos += bytes;
-                f->cache_start = f->current_pos;
-                f->valid_bytes = 0;
-
-                return bytes;
-            }
-
-            // Otherwise, fetch data from disk and fill cache
             if (io300_fetch(f) < 0) return -1;
             if (f->valid_bytes == 0) return total_read;
             pos_in_cache = 0;
@@ -306,13 +307,32 @@ ssize_t io300_read(struct io300_file* const f, char* const buff,
     }
 
     return total_read;
-
-    // return read(f->fd, buff, sz);
 }
 ssize_t io300_write(struct io300_file* const f, const char* buff,
                     size_t const sz) {
     check_invariants(f);
     // TODO: Implement this
+    
+    /*
+     * If the size of the data to be written is greater than the cache size, 
+     * we can directly write it to disk and skip the cache.
+     */
+    if (sz >= CACHE_SIZE) {
+        if (f->cache_dirty && io300_flush(f) == -1) {
+            return -1;
+        }
+
+        lseek(f->fd, f->current_pos, SEEK_SET);
+        f->stats.seeks++;
+        ssize_t bytes = write(f->fd, buff, sz);
+        f->stats.write_calls++;
+
+        f->current_pos += bytes;
+        f->cache_start = f->current_pos;
+        f->valid_bytes = 0;
+
+        return bytes;
+    }
 
     size_t total_written = 0;
 
@@ -324,27 +344,6 @@ ssize_t io300_write(struct io300_file* const f, const char* buff,
          * flush first and start writing at the beginning of the cache
          */
         if (pos_in_cache >= CACHE_SIZE) {
-            /*
-             * If the size of the data to be written is greater than the cache size, 
-             * we can directly write it to disk and skip the cache.
-             */
-            if (sz >= CACHE_SIZE) {
-                if (f->cache_dirty && io300_flush(f) == -1) {
-                    return -1;
-                }
-
-                lseek(f->fd, f->current_pos, SEEK_SET);
-                f->stats.seeks++;
-                ssize_t bytes = write(f->fd, buff, sz);
-                f->stats.write_calls++;
-
-                f->current_pos += bytes;
-                f->cache_start = f->current_pos;
-                f->valid_bytes = 0;
-
-                return bytes;
-            }
-
             if (f->cache_dirty && io300_flush(f) == -1) {
                 return -1;
             }
@@ -368,8 +367,6 @@ ssize_t io300_write(struct io300_file* const f, const char* buff,
     }
 
     return total_written;
-
-    // return write(f->fd, buff, sz);
 }
 
 int io300_flush(struct io300_file* const f) {
