@@ -51,7 +51,9 @@ struct io300_file {
     off_t cache_start;   // File offset where cache starts
     size_t valid_bytes;  // Number of valid bytes in cache
     off_t current_pos;   // Current file position
-    bool cache_dirty;  // True if cache has been modified and needs writing to disk.
+    off_t file_offset;   // The actual file offset
+    bool
+        cache_dirty;  // True if cache has been modified and needs writing to disk.
 
     /* Used for debugging, keep track of which io300_file is which */
     char* description;
@@ -63,7 +65,7 @@ struct io300_file {
     } stats;
 };
 
-int io300_fetch(struct io300_file* const f);
+int io300_fetch(struct io300_file* const f, off_t target_pos);
 
 /*
     Assert the properties that you would like your file to have at all times.
@@ -88,17 +90,13 @@ static void dbg(struct io300_file* f, char* fmt, ...) {
 #if (DEBUG_PRINT == 1)
     static char buff[300];
     size_t const size = sizeof(buff);
-    int n = snprintf(buff, size, 
-                     "{desc:%s, fd:%d, cache_start:%ld, valid_bytes:%zu, current_pos:%ld, cache_dirty:%d, stats(r/w/s):%d/%d/%d} -- ", 
-                     f->description,
-                     f->fd,
-                     f->cache_start,
-                     f->valid_bytes,
-                     f->current_pos,
-                     f->cache_dirty,
-                     f->stats.read_calls,
-                     f->stats.write_calls,
-                     f->stats.seeks);
+    int n =
+        snprintf(buff, size,
+                 "{desc:%s, fd:%d, cache_start:%ld, valid_bytes:%zu, "
+                 "current_pos:%ld, cache_dirty:%d, stats(r/w/s):%d/%d/%d} -- ",
+                 f->description, f->fd, f->cache_start, f->valid_bytes,
+                 f->current_pos, f->cache_dirty, f->stats.read_calls,
+                 f->stats.write_calls, f->stats.seeks);
     int const bytes_left = size - n;
     va_list args;
     va_start(args, fmt);
@@ -139,9 +137,10 @@ struct io300_file* io300_open(const char* const path, char* description) {
     ret->description = description;
     // TODO: Initialize your file
     // Initialize metadata
-    ret->current_pos = 0;  // Start at beginning of file
-    ret->cache_start = 0;  // Cache starts at file beginning
-    ret->valid_bytes = 0;  // No valid data in cache yet
+    ret->current_pos = 0;      // Start at beginning of file
+    ret->file_offset = 0;      // File offset starts at 0
+    ret->cache_start = 0;      // Cache starts at file beginning
+    ret->valid_bytes = 0;      // No valid data in cache yet
     ret->cache_dirty = false;  // Cache starts clean
 
     // Initialize statistics
@@ -156,7 +155,6 @@ struct io300_file* io300_open(const char* const path, char* description) {
 
 int io300_seek(struct io300_file* const f, off_t const pos) {
     check_invariants(f);
-    //f->stats.seeks++;
 
     // TODO: Implement this
 
@@ -176,21 +174,22 @@ int io300_seek(struct io300_file* const f, off_t const pos) {
 
     // Update our position tracking
     f->current_pos = pos;
-    // lseek(f->fd, pos, SEEK_SET);
-    // f->stats.seeks++;
 
-    /* 
-     * Invalidate cache that will trigger a fetch on next read
-     * On next write, we can just start writing at the start of the cache
-     * since we have already invalidated the cache and flushed any dirty data
-     */
-    f->cache_start = f->current_pos;
-    f->valid_bytes = 0;
+    // If new position is not aligned, fetch immediately
+    if (pos % CACHE_SIZE != 0) {
+        if (io300_fetch(f, pos) == -1) return -1;
+    } else {
+        /* 
+        * Otherwise, invalidate cache that will trigger a fetch on next read.
+        * On next write, we can just start writing at the start of the cache
+        * since we have already invalidated the cache and flushed any dirty data
+        */
+        f->cache_start = f->current_pos;
+        f->valid_bytes = 0;
+    }
 
     // Return new position
     return pos;
-
-    //return lseek(f->fd, pos, SEEK_SET);
 }
 
 int io300_close(struct io300_file* const f) {
@@ -233,7 +232,8 @@ int io300_readc(struct io300_file* const f) {
 
     // Check if current position is in cache range
     if (f->current_pos >= f->cache_start + (off_t)f->valid_bytes) {
-        if (io300_fetch(f) < 0 || f->valid_bytes == 0) return -1;
+        if (io300_fetch(f, f->current_pos) < 0 || f->valid_bytes == 0)
+            return -1;
     }
 
     return (unsigned char)f->cache[f->current_pos++ - f->cache_start];
@@ -244,11 +244,15 @@ int io300_writec(struct io300_file* f, int ch) {
     // TODO: Implement this
 
     if (f->current_pos >= f->cache_start + CACHE_SIZE) {
-        if (f->cache_dirty) {
-            if (io300_flush(f) == -1) return -1;
+        // If current position is not aligned, we need to fetch existing data first
+        if (f->current_pos % CACHE_SIZE != 0) {
+            if (io300_fetch(f, f->current_pos) == -1) return -1;
+        } else {
+            // If current position is aligned, we can start writing at the beginning of the cache
+            if (f->cache_dirty && io300_flush(f) == -1) return -1;
+            f->cache_start = f->current_pos;
+            f->valid_bytes = 0;
         }
-        f->cache_start = f->current_pos;
-        f->valid_bytes = 0;
     }
 
     f->cache[f->current_pos - f->cache_start] = ch;
@@ -277,10 +281,13 @@ ssize_t io300_read(struct io300_file* const f, char* const buff,
             return -1;
         }
 
-        lseek(f->fd, f->current_pos, SEEK_SET);
-        f->stats.seeks++;
+        if (f->current_pos != f->file_offset) {
+            f->file_offset = lseek(f->fd, f->current_pos, SEEK_SET);
+            f->stats.seeks++;
+        }
         ssize_t bytes = read(f->fd, buff, sz);
         f->stats.read_calls++;
+        f->file_offset += bytes;
 
         f->current_pos += bytes;
         f->cache_start = f->current_pos;
@@ -297,9 +304,9 @@ ssize_t io300_read(struct io300_file* const f, char* const buff,
 
         // If current position is outside cache, fetch data from disk and fill cache first
         if (pos_in_cache >= (off_t)f->valid_bytes) {
-            if (io300_fetch(f) < 0) return -1;
+            if (io300_fetch(f, f->current_pos) < 0) return -1;
             if (f->valid_bytes == 0) return total_read;
-            pos_in_cache = 0;
+            pos_in_cache = f->current_pos - f->cache_start;
         }
 
         // Copy data to user buffer from cache
@@ -327,10 +334,13 @@ ssize_t io300_write(struct io300_file* const f, const char* buff,
             return -1;
         }
 
-        lseek(f->fd, f->current_pos, SEEK_SET);
-        f->stats.seeks++;
+        if (f->current_pos != f->file_offset) {
+            f->file_offset = lseek(f->fd, f->current_pos, SEEK_SET);
+            f->stats.seeks++;
+        }
         ssize_t bytes = write(f->fd, buff, sz);
         f->stats.write_calls++;
+        f->file_offset += bytes;
 
         f->current_pos += bytes;
         f->cache_start = f->current_pos;
@@ -346,16 +356,19 @@ ssize_t io300_write(struct io300_file* const f, const char* buff,
 
         /* 
          * If current position is outside cache, 
-         * flush first and start writing at the beginning of the cache
+         * if current position is not aligned, fetch data from disk and fill cache first.
+         * Otherwise, we can start writing at the beginning of the cache.
          */
         if (pos_in_cache >= CACHE_SIZE) {
-            if (f->cache_dirty && io300_flush(f) == -1) {
-                return -1;
+            // If current position is not aligned, fetch existing data first
+            if (f->current_pos % CACHE_SIZE != 0) {
+                if (io300_fetch(f, f->current_pos) == -1) return -1;
+            } else {
+                if (f->cache_dirty && io300_flush(f) == -1) return -1;
+                f->cache_start = f->current_pos;
+                f->valid_bytes = 0;
             }
-            f->cache_start = f->current_pos;
-            f->valid_bytes = 0;
-
-            pos_in_cache = 0;
+            pos_in_cache = f->current_pos - f->cache_start;
         }
 
         // Copy data to cache
@@ -381,15 +394,22 @@ int io300_flush(struct io300_file* const f) {
     if (!f->cache_dirty) return 0;
 
     // Seek to cache start and write valid bytes
-    lseek(f->fd, f->cache_start, SEEK_SET);
-    f->stats.seeks++;
-    if (write(f->fd, f->cache, f->valid_bytes) == -1) return -1;
+    if (f->cache_start != f->file_offset) {
+        f->file_offset = lseek(f->fd, f->cache_start, SEEK_SET);
+        f->stats.seeks++;
+    }
+
+    ssize_t bytes = write(f->fd, f->cache, f->valid_bytes);
     f->stats.write_calls++;
+
+    if (bytes < 0) return -1;
     f->cache_dirty = false;
+    f->file_offset += bytes;
+
     return 0;
 }
 
-int io300_fetch(struct io300_file* const f) {
+int io300_fetch(struct io300_file* const f, off_t target_pos) {
     check_invariants(f);
     // TODO: Implement this
     /* This helper should contain the logic for fetching data from the file into the cache. */
@@ -399,14 +419,22 @@ int io300_fetch(struct io300_file* const f) {
     // Flush if needed
     if (f->cache_dirty && io300_flush(f) == -1) return -1;
 
-    // Read new block at current position
-    lseek(f->fd, f->current_pos, SEEK_SET);
-    f->stats.seeks++;
-    f->cache_start = f->current_pos;
+    // Calculate aligned position
+    off_t aligned_pos = target_pos - (target_pos % CACHE_SIZE);
+
+    // Read new block at aligned position
+    if (aligned_pos != f->file_offset) {
+        f->file_offset = lseek(f->fd, aligned_pos, SEEK_SET);
+        f->stats.seeks++;
+    }
+
+    f->cache_start = aligned_pos;
     ssize_t bytes = read(f->fd, f->cache, CACHE_SIZE);
     f->stats.read_calls++;
+
     if (bytes < 0) return -1;  // Errors
     f->valid_bytes = bytes;
+    f->file_offset += bytes;
 
     return 0;
 }
