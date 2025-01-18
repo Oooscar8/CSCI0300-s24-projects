@@ -51,9 +51,7 @@ struct io300_file {
     off_t cache_start;   // File offset where cache starts
     size_t valid_bytes;  // Number of valid bytes in cache
     off_t current_pos;   // Current file position
-    //bool cache_valid;     // True if cache contains valid data for current position range([cache_start, cache_start + valid_bytes))
-    bool
-        cache_dirty;  // True if cache has been modified and needs writing to disk.
+    bool cache_dirty;  // True if cache has been modified and needs writing to disk.
 
     /* Used for debugging, keep track of which io300_file is which */
     char* description;
@@ -90,9 +88,17 @@ static void dbg(struct io300_file* f, char* fmt, ...) {
 #if (DEBUG_PRINT == 1)
     static char buff[300];
     size_t const size = sizeof(buff);
-    int n = snprintf(buff, size,
-                     // TODO: Add the fields you want to print when debugging
-                     "{desc:%s, } -- ", f->description);
+    int n = snprintf(buff, size, 
+                     "{desc:%s, fd:%d, cache_start:%ld, valid_bytes:%zu, current_pos:%ld, cache_dirty:%d, stats(r/w/s):%d/%d/%d} -- ", 
+                     f->description,
+                     f->fd,
+                     f->cache_start,
+                     f->valid_bytes,
+                     f->current_pos,
+                     f->cache_dirty,
+                     f->stats.read_calls,
+                     f->stats.write_calls,
+                     f->stats.seeks);
     int const bytes_left = size - n;
     va_list args;
     va_start(args, fmt);
@@ -136,7 +142,6 @@ struct io300_file* io300_open(const char* const path, char* description) {
     ret->current_pos = 0;  // Start at beginning of file
     ret->cache_start = 0;  // Cache starts at file beginning
     ret->valid_bytes = 0;  // No valid data in cache yet
-    //ret->cache_valid = false;    // Cache starts invalid
     ret->cache_dirty = false;  // Cache starts clean
 
     // Initialize statistics
@@ -312,7 +317,7 @@ ssize_t io300_write(struct io300_file* const f, const char* buff,
                     size_t const sz) {
     check_invariants(f);
     // TODO: Implement this
-    
+
     /*
      * If the size of the data to be written is greater than the cache size, 
      * we can directly write it to disk and skip the cache.
